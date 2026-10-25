@@ -1,0 +1,32 @@
+[workspace]
+
+[package]
+name = "poltergift_template"
+description = "Poltergift: secret gift exchange rounds with anonymous, once-only claims"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[dependencies]
+tari_template_lib = "0.35"
+
+[dev-dependencies]
+tari_template_test_tooling = "0.47"
+tari_bor = "0.16"
+poltergift-ring = { path = "../crates/ring" }
+rand_chacha = "0.10"
+rand_core = "0.10"
+proptest = "1"
+sha2 = "0.10"
+hex = "0.4"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
