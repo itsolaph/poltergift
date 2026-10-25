@@ -105,9 +105,8 @@ on the Ootle. Node, wallet and miner live under `./.chain/l1/` (gitignored); key
   Key images from different rounds use different `H`, so they cannot be linked across rounds and
   a signature from one round never verifies in another (round id is also in the prefix).
 * Verification cost in the template: per ring member, two 2-term MSMs and one SHA-512.
-  *Estimate*: ≈1.3M native points per member, so ≈5.5M (N=4), ≈10.6M (N=8), ≈21M (N=16), all
-  inside the 32M fee-intent grace even before `pay_fee`. Maximum ring size: 16 (raised only if
-  the measurements below allow it).
+  Measured: ≈1.36M native points per member on top of a fixed ≈8.7M (see "Measured costs").
+  Maximum ring size: 16.
 
 Alternatives considered:
 
@@ -195,4 +194,16 @@ derived from public state.
 
 ## Measured costs
 
-(filled in from `template/tests` with fees enabled)
+From `template/tests/fees.rs` (official engine, Esmeralda fee table, one claim with fees on):
+
+| ring size | fee charged | native points | WASM points |
+|---|---|---|---|
+| 4 | 17,651 µT (0.018 tTARI) | 14.18M | 0.27M |
+| 8 | 23,480 µT (0.023 tTARI) | 19.61M | 0.44M |
+| 16 | 35,135 µT (0.035 tTARI) | 30.46M | 0.77M |
+
+Fixed part ≈ 8.7M points (verifying the payout's stealth output and statement), plus ≈1.36M per
+ring member (two 2-term MSMs and one SHA-512 each). The claim pays its fee before verifying, so
+the free fee-intent grace (32M) is not the binding limit. Measured with `claim_fee = 1 tTARI`, the
+vault paid out exactly `payout + fee charged` and got the rest back. The CLI therefore defaults
+`claim_fee` to 0.05 tTARI for rings up to 16.

@@ -38,6 +38,8 @@ pub struct Harness {
     pub owner_proof: NonFungibleAddress,
     pub account_key: RistrettoSecretKey,
     pub rng: ChaCha20Rng,
+    /// When set, account-funded transactions carry a fee instruction paying this much at most.
+    pub account_fee: Option<u64>,
 }
 
 /// A round as its members see it.
@@ -68,7 +70,12 @@ pub fn payout_message(statement: &StealthTransferStatement) -> [u8; 32] {
 
 impl Harness {
     pub fn new() -> Self {
-        let mut test = TemplateTest::new(env!("CARGO_MANIFEST_DIR"), ["."]);
+        Self::with_templates(&["."])
+    }
+
+    /// A harness that also compiles the given extra test templates (paths relative to the crate).
+    pub fn with_templates(paths: &[&str]) -> Self {
+        let mut test = TemplateTest::new(env!("CARGO_MANIFEST_DIR"), paths.iter().copied());
         let template = test.get_template_address("Round");
         let (account, owner_proof, account_key) = test.create_funded_account();
         let mut h = Self {
@@ -78,9 +85,19 @@ impl Harness {
             owner_proof,
             account_key,
             rng: ChaCha20Rng::seed_from_u64(0x9057),
+            account_fee: None,
         };
         h.set_epoch(1);
         h
+    }
+
+    /// A transaction builder for account-funded calls (fee instruction added when fees are on).
+    pub fn account_tx(&self) -> tari_template_test_tooling::transaction::TransactionBuilder {
+        let b = self.test.transaction();
+        match self.account_fee {
+            Some(fee) => b.pay_fee_from_component(self.account, fee),
+            None => b,
+        }
     }
 
     pub fn set_epoch(&mut self, epoch: u64) {
@@ -94,8 +111,7 @@ impl Harness {
 
     pub fn try_create(&mut self, gift: u64, size: u32, join_deadline: u64, claim_deadline: u64, fee: u64) -> Result<ComponentAddress, RejectReason> {
         let tx = self
-            .test
-            .transaction()
+            .account_tx()
             .call_function(self.template, "create", args![
                 Amount::from(gift),
                 size,
@@ -134,8 +150,7 @@ impl Harness {
     /// Joins with `gift_amount` withdrawn from the funded account, an arbitrary member key and PoP.
     pub fn try_join_raw(&mut self, component: ComponentAddress, member: [u8; 32], pop: Vec<u8>, gift_amount: u64) -> Result<ExecuteResult, RejectReason> {
         let tx = self
-            .test
-            .transaction()
+            .account_tx()
             .call_method(self.account, "withdraw", args![TARI_TOKEN, Amount::from(gift_amount)])
             .put_last_instruction_output_on_workspace("gift")
             .call_method(component, "join", args![pk_bytes(member), pop, Workspace("gift")])
@@ -243,12 +258,24 @@ impl Harness {
 
     /// `(joined, size, claims, refunds, sealed)`
     pub fn status(&mut self, component: ComponentAddress) -> (u32, u32, u32, u32, bool) {
-        self.test.call_method(component, "status", args![], vec![])
+        self.view(component, "status")
     }
 
     pub fn vault_balance(&mut self, component: ComponentAddress) -> u64 {
-        let amount: Amount = self.test.call_method(component, "balance", args![], vec![]);
+        let amount: Amount = self.view(component, "balance");
         u64::try_from(amount.to_u128()).unwrap()
+    }
+
+    /// Calls a read-only method. Views are free in tests, so fees are paused around the call.
+    fn view<T: serde::de::DeserializeOwned + for<'b> tari_bor::Decode<'b, ()>>(&mut self, component: ComponentAddress, method: &str) -> T {
+        if self.account_fee.is_some() {
+            self.test.disable_fees();
+        }
+        let value = self.test.call_method(component, method, args![], vec![]);
+        if self.account_fee.is_some() {
+            self.test.enable_fees();
+        }
+        value
     }
 }
 

@@ -15,11 +15,11 @@ tari_template_lib = "0.35"
 tari_template_test_tooling = "0.47"
 tari_bor = "0.16"
 poltergift-ring = { path = "../crates/ring" }
+poltergift-model = { path = "../crates/model" }
 rand_chacha = "0.10"
 rand_core = "0.10"
 proptest = "1"
-sha2 = "0.10"
-hex = "0.4"
+serde = "1"
 
 [lib]
 crate-type = ["cdylib"]

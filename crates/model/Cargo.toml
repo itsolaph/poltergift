@@ -1,0 +1,15 @@
+[package]
+name = "poltergift-model"
+description = "Executable model of the Poltergift round template rules (used by the web demo and checked against the real template)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+poltergift-ring = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+rand_chacha = { workspace = true }
+rand_core = { workspace = true }

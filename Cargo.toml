@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/ring"]
+members = ["crates/ring", "crates/model"]
 exclude = ["template", ".chain"]
 
 [workspace.package]
