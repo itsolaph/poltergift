@@ -149,3 +149,54 @@ impl Store {
         write_private(&self.rounds_path(), serde_json::to_string_pretty(&all)?.as_bytes())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_dir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("poltergift-store-{name}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        dir
+    }
+
+    #[test]
+    fn wallet_round_trips_and_is_private() {
+        let dir = temp_dir("wallet");
+        let store = Store::open(&dir).unwrap();
+        let (created, fresh) = store.load_or_create_wallet(Network::LocalNet).unwrap();
+        assert!(fresh);
+        let (again, fresh) = store.load_or_create_wallet(Network::LocalNet).unwrap();
+        assert!(!fresh);
+        assert_eq!(created.to_address(), again.to_address());
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = fs::metadata(dir.join("wallet.json")).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode, 0o600, "wallet file must be private");
+            let mode = fs::metadata(&dir).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode, 0o700, "data dir must be private");
+        }
+        assert!(store.load_wallet(Network::Esmeralda).is_err(), "wrong network must be refused");
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn member_records_persist() {
+        let dir = temp_dir("rounds");
+        let store = Store::open(&dir).unwrap();
+        assert!(store.round("component_x").unwrap().is_none());
+        let key = SecretKey::random(&mut rand::rng());
+        let rec = MemberRecord {
+            member_secret: hex::encode(key.to_bytes()),
+            member_public: hex::encode(key.public_key()),
+            join_tx: Some("tx".into()),
+            ..Default::default()
+        };
+        store.save_round("component_x", &rec).unwrap();
+        let loaded = store.round("component_x").unwrap().unwrap();
+        assert_eq!(loaded.secret().unwrap().public_key(), key.public_key());
+        assert_eq!(loaded.join_tx.as_deref(), Some("tx"));
+        fs::remove_dir_all(&dir).unwrap();
+    }
+}
