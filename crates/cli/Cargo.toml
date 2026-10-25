@@ -23,3 +23,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 hex = { workspace = true }
 rand = "0.10"
+
+[dev-dependencies]
+reqwest = { version = "0.13", features = ["json"] }
