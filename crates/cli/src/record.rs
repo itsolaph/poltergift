@@ -1,7 +1,10 @@
 //! Appends public facts (addresses, transaction ids, public keys, tags) to a deployment record such
 //! as `deployments/esmeralda.json`. Never writes secrets.
 
-use std::{fs, path::{Path, PathBuf}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Result;
 use ootle_rs::Network;
@@ -45,10 +48,7 @@ impl Recorder {
     }
 
     fn round_mut<'a>(v: &'a mut Value, component: &str) -> Option<&'a mut Value> {
-        v["rounds"]
-            .as_array_mut()?
-            .iter_mut()
-            .find(|r| r["component"] == component)
+        v["rounds"].as_array_mut()?.iter_mut().find(|r| r["component"] == component)
     }
 
     pub fn template(&self, address: &str, tx: &str, wasm: &[u8]) -> Result<()> {

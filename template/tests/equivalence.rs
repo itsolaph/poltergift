@@ -81,19 +81,12 @@ impl Sim {
             1,
         )
         .unwrap();
-        Self {
-            h,
-            round,
-            model,
-            rng: ChaCha20Rng::seed_from_u64(seed),
-            now: 1,
-            deposited: 0,
-        }
+        Self { h, round, model, rng: ChaCha20Rng::seed_from_u64(seed), now: 1, deposited: 0 }
     }
 
     fn check(&self, label: &str, template: Option<String>, model: Result<(), poltergift_model::Rejected>) {
         match (&template, &model) {
-            (None, Ok(())) => {},
+            (None, Ok(())) => {}
             (Some(t), Err(m)) => assert!(t.contains(m.0), "{label}: template said {t:?}, model said {m:?}"),
             _ => panic!("{label}: outcomes differ: template {template:?}, model {model:?}"),
         }
@@ -104,7 +97,7 @@ impl Sim {
             Op::Advance { epochs } => {
                 self.now += epochs as u64;
                 self.h.set_epoch(self.now);
-            },
+            }
             Op::Join { dup, bad_pop, delta } => {
                 let key = if dup && !self.round.members.is_empty() {
                     self.round.members[0].clone()
@@ -121,7 +114,7 @@ impl Sim {
                     self.round.members.push(key);
                     self.deposited += amount as u128;
                 }
-            },
+            }
             Op::Claim { who, redirect, wrong_amount } => {
                 let amount = if wrong_amount { PAYOUT + 1 } else { PAYOUT };
                 let signed = payout(amount);
@@ -146,22 +139,22 @@ impl Sim {
                     let outsider = SecretKey::random(&mut self.rng);
                     let mut fake = ring_keys.clone();
                     fake[0] = outsider.public_key();
-                    let (s, i) =
-                        ring::sign(Purpose::Claim, &self.round.round_id, &fake, 0, &outsider, &msg_signed, &mut self.rng)
-                            .unwrap();
+                    let (s, i) = ring::sign(
+                        Purpose::Claim,
+                        &self.round.round_id,
+                        &fake,
+                        0,
+                        &outsider,
+                        &msg_signed,
+                        &mut self.rng,
+                    )
+                    .unwrap();
                     (i, s.to_bytes())
                 };
                 let t = self.h.submit_claim(self.round.component, image, sig.clone(), submitted.clone());
-                let m = self.model.claim(
-                    self.now,
-                    image,
-                    &sig,
-                    &shape_of(&submitted),
-                    &payout_message(&submitted),
-                    0,
-                );
+                let m = self.model.claim(self.now, image, &sig, &shape_of(&submitted), &payout_message(&submitted), 0);
                 self.check("claim", reason(&t), m);
-            },
+            }
             Op::Refund { who, steal } => {
                 let statement = payout(PAYOUT);
                 let msg = payout_message(&statement);
@@ -173,14 +166,27 @@ impl Sim {
                     let o = SecretKey::random(&mut self.rng);
                     (o.clone(), o)
                 };
-                let (proof, image) =
-                    ring::sign(Purpose::Refund, &self.round.round_id, &[signer.public_key()], 0, &signer, &msg, &mut self.rng)
-                        .unwrap();
+                let (proof, image) = ring::sign(
+                    Purpose::Refund,
+                    &self.round.round_id,
+                    &[signer.public_key()],
+                    0,
+                    &signer,
+                    &msg,
+                    &mut self.rng,
+                )
+                .unwrap();
                 let proof = proof.to_bytes();
-                let t = self.h.submit_refund(self.round.component, member.public_key(), image, proof.clone(), statement.clone());
+                let t = self.h.submit_refund(
+                    self.round.component,
+                    member.public_key(),
+                    image,
+                    proof.clone(),
+                    statement.clone(),
+                );
                 let m = self.model.refund(self.now, member.public_key(), image, &proof, &shape_of(&statement), &msg, 0);
                 self.check("refund", reason(&t), m);
-            },
+            }
         }
         self.check_invariants();
     }

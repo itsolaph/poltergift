@@ -161,12 +161,7 @@ pub fn decode_scalar(bytes: &ScalarBytes) -> Result<Scalar, Error> {
 /// discrete log nobody knows.
 pub fn tag_base(round_id: &RoundId) -> Result<(RistrettoPoint, PointBytes), Error> {
     for ctr in 0..TAG_BASE_MAX_ATTEMPTS {
-        let candidate = blake2b(&[
-            &framed_dst(dst::TAG_BASE),
-            dst::TAG_BASE,
-            round_id,
-            &ctr.to_le_bytes(),
-        ]);
+        let candidate = blake2b(&[&framed_dst(dst::TAG_BASE), dst::TAG_BASE, round_id, &ctr.to_le_bytes()]);
         if let Ok(p) = decode_nonidentity_point(&candidate) {
             return Ok((p, candidate));
         }
@@ -276,7 +271,13 @@ impl RingSignature {
 }
 
 /// `len ‖ dst ‖ round_id ‖ ring_hash ‖ I ‖ msg`, the fixed prefix of every challenge hash.
-fn challenge_prefix(purpose: Purpose, round_id: &RoundId, ring_hash: &[u8; 32], image: &PointBytes, msg: &[u8; 32]) -> Vec<u8> {
+fn challenge_prefix(
+    purpose: Purpose,
+    round_id: &RoundId,
+    ring_hash: &[u8; 32],
+    image: &PointBytes,
+    msg: &[u8; 32],
+) -> Vec<u8> {
     let tag = purpose.dst();
     let mut prefix = Vec::with_capacity(1 + tag.len() + 32 * 4);
     prefix.extend_from_slice(&framed_dst(tag));
@@ -345,13 +346,7 @@ pub fn sign<R: CryptoRng + ?Sized>(
     s[signer_index] = alpha - c[signer_index] * x;
     alpha.zeroize();
 
-    Ok((
-        RingSignature {
-            c0: c[0].to_bytes(),
-            s: s.iter().map(Scalar::to_bytes).collect(),
-        },
-        image,
-    ))
+    Ok((RingSignature { c0: c[0].to_bytes(), s: s.iter().map(Scalar::to_bytes).collect() }, image))
 }
 
 /// Verifies a ring signature. The checks match the template's exactly: ring size, canonical and

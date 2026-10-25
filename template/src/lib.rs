@@ -53,18 +53,12 @@ mod poltergift {
             claim_deadline: u64,
             claim_fee: Amount,
         ) -> Component<Self> {
-            assert!(
-                size >= 2 && size as usize <= MAX_RING_SIZE,
-                "round size must be between 2 and {MAX_RING_SIZE}"
-            );
+            assert!(size >= 2 && size as usize <= MAX_RING_SIZE, "round size must be between 2 and {MAX_RING_SIZE}");
             assert!(claim_fee.is_positive(), "claim fee must be positive");
             assert!(claim_fee < gift_amount, "claim fee must be smaller than the gift");
             // Payouts are stealth outputs, whose values are range-proven below 2^64.
             assert!(gift_amount.to_u128() <= u64::MAX as u128, "gift amount too large");
-            assert!(
-                gift_amount.checked_mul(Amount::from(size)).is_some(),
-                "gift amount times size overflows"
-            );
+            assert!(gift_amount.checked_mul(Amount::from(size)).is_some(), "gift amount times size overflows");
             let now = Consensus::current_epoch();
             assert!(join_deadline > now, "join deadline must be in the future");
             assert!(claim_deadline > join_deadline, "claim deadline must be after the join deadline");
@@ -107,10 +101,7 @@ mod poltergift {
             assert!(gift.amount() == self.gift_amount, "gift must be exactly the round's gift amount");
             assert!(crypto::is_valid_point(&member), "member key must be a canonical non-identity point");
             assert!(!self.members.contains(&member), "member key already joined");
-            assert!(
-                crypto::verify_pop(&self.round_id.into_array(), &member, &pop),
-                "invalid proof of possession"
-            );
+            assert!(crypto::verify_pop(&self.round_id.into_array(), &member, &pop), "invalid proof of possession");
 
             self.vault.deposit(gift);
             self.members.push(member);
@@ -125,7 +116,12 @@ mod poltergift {
         /// Claims one gift anonymously. `signature` is a ring signature over all members that signs
         /// the exact `payout` statement; `key_image` is its one-time tag. Must run in the fee
         /// intent: the round vault pays `claim_fee` for this transaction.
-        pub fn claim(&mut self, key_image: RistrettoPublicKeyBytes, signature: Vec<u8>, payout: StealthTransferStatement) {
+        pub fn claim(
+            &mut self,
+            key_image: RistrettoPublicKeyBytes,
+            signature: Vec<u8>,
+            payout: StealthTransferStatement,
+        ) {
             let ring_hash = self.ring_hash.expect("round is not sealed");
             assert!(Consensus::current_epoch() < self.claim_deadline, "claim deadline has passed");
             assert!(!self.spent_tags.contains(&key_image), "gift already claimed with this tag");
@@ -172,11 +168,7 @@ mod poltergift {
             } else {
                 assert!(epoch >= self.join_deadline, "round is open and the join deadline has not passed");
             }
-            let index = self
-                .members
-                .iter()
-                .position(|m| *m == member)
-                .expect("not a member of this round") as u32;
+            let index = self.members.iter().position(|m| *m == member).expect("not a member of this round") as u32;
             assert!(!self.refunded.contains(&index), "member already refunded");
             assert!(!self.spent_tags.contains(&key_image), "gift already claimed with this tag");
             self.check_payout(&payout);
@@ -210,13 +202,7 @@ mod poltergift {
 
         /// Read-only summary: `(joined, size, claims, refunds, sealed)`.
         pub fn status(&self) -> (u32, u32, u32, u32, bool) {
-            (
-                self.members.len() as u32,
-                self.size,
-                self.claims,
-                self.refunds,
-                self.ring_hash.is_some(),
-            )
+            (self.members.len() as u32, self.size, self.claims, self.refunds, self.ring_hash.is_some())
         }
 
         /// The round id (component address key) that every signature in this round is bound to.
@@ -235,9 +221,7 @@ mod poltergift {
         }
 
         fn payout_amount(&self) -> Amount {
-            self.gift_amount
-                .checked_sub(self.claim_fee)
-                .expect("claim fee is smaller than the gift")
+            self.gift_amount.checked_sub(self.claim_fee).expect("claim fee is smaller than the gift")
         }
 
         /// A payout is exactly one fresh stealth output funded only by the revealed gift: no stealth

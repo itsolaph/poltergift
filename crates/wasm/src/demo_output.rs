@@ -53,7 +53,12 @@ fn decode(hex_str: &str) -> Option<[u8; 32]> {
 }
 
 impl DemoOutput {
-    pub fn create<R: CryptoRng + ?Sized>(view: &PointBytes, spend: &PointBytes, amount: u64, rng: &mut R) -> Option<Self> {
+    pub fn create<R: CryptoRng + ?Sized>(
+        view: &PointBytes,
+        spend: &PointBytes,
+        amount: u64,
+        rng: &mut R,
+    ) -> Option<Self> {
         let view = ring::decode_nonidentity_point(view).ok()?;
         let spend = ring::decode_nonidentity_point(spend).ok()?;
         let r = SecretKey::random(rng);

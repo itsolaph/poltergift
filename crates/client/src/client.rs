@@ -4,12 +4,7 @@ use std::{collections::HashSet, num::NonZeroU64, time::Duration};
 
 use anyhow::{Context, Result, anyhow, bail};
 use ootle_rs::{
-    Address,
-    Epoch,
-    Network,
-    ToAccountAddress,
-    TransactionOutcome,
-    TransactionRequest,
+    Address, Epoch, Network, ToAccountAddress, TransactionOutcome, TransactionRequest,
     builtin_templates::{UnsignedTransactionBuilder, faucet::IFaucet},
     key_provider::PrivateKeyProvider,
     keys::OotleSecretKey,
@@ -26,10 +21,7 @@ use tari_ootle_common_types::engine_types::{
 };
 use tari_ootle_transaction::{Transaction, TransactionId, UnsignedTransaction, args};
 use tari_template_lib_types::{
-    Amount,
-    ComponentAddress,
-    TemplateAddress,
-    UtxoAddress,
+    Amount, ComponentAddress, TemplateAddress, UtxoAddress,
     constants::TARI_TOKEN,
     crypto::{PedersenCommitmentBytes, RistrettoPublicKeyBytes},
     stealth::StealthTransferStatement,
@@ -171,7 +163,7 @@ impl PoltergiftClient {
                 Err(e) if is_epoch_race(&e.to_string()) && attempt < EPOCH_RACE_RETRIES => {
                     attempt += 1;
                     tokio::time::sleep(EPOCH_RACE_PAUSE).await;
-                },
+                }
                 Err(e) => return Err(e.into()),
             }
         }
@@ -182,8 +174,10 @@ impl PoltergiftClient {
         let tx_id = pending.tx_id();
         let outcome = pending.watch().await.with_context(|| format!("waiting for {tx_id}"))?;
         match outcome {
-            TransactionOutcome::Commit => {},
-            TransactionOutcome::OnlyFeeCommit(reason) => bail!("transaction {tx_id} failed after paying its fee: {reason}"),
+            TransactionOutcome::Commit => {}
+            TransactionOutcome::OnlyFeeCommit(reason) => {
+                bail!("transaction {tx_id} failed after paying its fee: {reason}")
+            }
             TransactionOutcome::Reject(reason) => bail!("transaction {tx_id} was rejected: {reason}"),
         }
         let receipt = pending.get_receipt().await?;
@@ -192,7 +186,9 @@ impl PoltergiftClient {
 
     /// Account-paid transaction: dry-run at a generous max fee, then submit with the fee it reports.
     async fn submit_account_paid<F>(&mut self, build: F, wants: &[WantInput]) -> Result<Finalized>
-    where F: Fn(u64, Epoch) -> UnsignedTransaction {
+    where
+        F: Fn(u64, Epoch) -> UnsignedTransaction,
+    {
         let max_epoch = self.max_epoch().await?;
         let mut wants = wants.to_vec();
         wants.push(WantInput::VaultForResource {
@@ -204,10 +200,7 @@ impl PoltergiftClient {
         let result = self.provider.sign_and_send_dry_run(dry).await?;
         let fee = required_fee(&result)?;
         let unsigned = self.resolve(build(fee, max_epoch), &wants).await?;
-        let tx = TransactionRequest::default()
-            .with_transaction(unsigned)
-            .build(self.provider.wallet())
-            .await?;
+        let tx = TransactionRequest::default().with_transaction(unsigned).build(self.provider.wallet()).await?;
         self.submit(tx).await
     }
 
@@ -219,21 +212,18 @@ impl PoltergiftClient {
     /// e.g. localnet).
     pub async fn take_faucet(&mut self) -> Result<Finalized> {
         let max_epoch = self.max_epoch().await?;
-        let unsigned = IFaucet::new(&self.provider, max_epoch)
-            .take_faucet_funds()
-            .pay_fee(DRY_RUN_FEE)
-            .prepare()
-            .await?;
-        let tx = TransactionRequest::default()
-            .with_transaction(unsigned)
-            .build(self.provider.wallet())
-            .await?;
+        let unsigned =
+            IFaucet::new(&self.provider, max_epoch).take_faucet_funds().pay_fee(DRY_RUN_FEE).prepare().await?;
+        let tx = TransactionRequest::default().with_transaction(unsigned).build(self.provider.wallet()).await?;
         self.submit(tx).await
     }
 
     /// Moves `amounts` from the account into fresh stealth outputs owned by `recipients` (one each).
     /// Returns the created output commitments in order.
-    pub async fn send_stealth(&mut self, recipients: &[(Address, u64)]) -> Result<(Finalized, Vec<PedersenCommitmentBytes>)> {
+    pub async fn send_stealth(
+        &mut self,
+        recipients: &[(Address, u64)],
+    ) -> Result<(Finalized, Vec<PedersenCommitmentBytes>)> {
         let total: u64 = recipients.iter().map(|(_, a)| a).sum();
         let mut builder = StealthTransfer::new(TARI_TOKEN, &self.provider).spend_revealed_input(total);
         for (addr, amount) in recipients {
@@ -290,7 +280,11 @@ impl PoltergiftClient {
         Ok((template.as_template_address(), finalized))
     }
 
-    pub async fn create_round(&mut self, template: TemplateAddress, p: RoundParams) -> Result<(ComponentAddress, Finalized)> {
+    pub async fn create_round(
+        &mut self,
+        template: TemplateAddress,
+        p: RoundParams,
+    ) -> Result<(ComponentAddress, Finalized)> {
         let account = self.account();
         let network = self.network();
         let finalized = self
@@ -299,13 +293,17 @@ impl PoltergiftClient {
                     Transaction::builder(network, max_epoch)
                         .with_auto_fill_inputs()
                         .pay_fee_from_component(account, fee)
-                        .call_function(template, "create", args![
-                            Amount::from(p.gift_amount),
-                            p.size,
-                            p.join_deadline,
-                            p.claim_deadline,
-                            Amount::from(p.claim_fee)
-                        ])
+                        .call_function(
+                            template,
+                            "create",
+                            args![
+                                Amount::from(p.gift_amount),
+                                p.size,
+                                p.join_deadline,
+                                p.claim_deadline,
+                                Amount::from(p.claim_fee)
+                            ],
+                        )
                         .build_unsigned()
                 },
                 &[],
@@ -330,7 +328,7 @@ impl PoltergiftClient {
                 Err(e) if is_epoch_race(&e.to_string()) && attempt < EPOCH_RACE_RETRIES => {
                     attempt += 1;
                     tokio::time::sleep(EPOCH_RACE_PAUSE).await;
-                },
+                }
                 Err(e) => return Err(e.into()),
             }
         }
@@ -402,14 +400,11 @@ impl PoltergiftClient {
         // First pass with a generous fee budget to learn the real fee; the budget is part of the
         // statement, so the final statement is rebuilt with the measured fee.
         let probe_budget = 200_000u64.min(input_value.saturating_sub(gift + 1));
-        let (tx, _) = self
-            .stealth_join_tx(component, &member_pk, &pop, input, input_value, gift, probe_budget, true)
-            .await?;
+        let (tx, _) =
+            self.stealth_join_tx(component, &member_pk, &pop, input, input_value, gift, probe_budget, true).await?;
         let result = self.provider.send_dry_run(tx).await?;
         let fee = required_fee(&result)?;
-        let (tx, _) = self
-            .stealth_join_tx(component, &member_pk, &pop, input, input_value, gift, fee, false)
-            .await?;
+        let (tx, _) = self.stealth_join_tx(component, &member_pk, &pop, input, input_value, gift, fee, false).await?;
         self.submit(tx).await
     }
 
@@ -451,10 +446,7 @@ impl PoltergiftClient {
             .with_dry_run(dry_run);
         let unsigned = self.resolve(unsigned, &Self::round_wants(component)).await?;
         let authorizer = self.provider.wallet().stealth_authorizer(signers);
-        let tx = TransactionRequest::default()
-            .with_transaction(unsigned)
-            .build(&authorizer)
-            .await?;
+        let tx = TransactionRequest::default().with_transaction(unsigned).build(&authorizer).await?;
         Ok((tx, statement))
     }
 
@@ -478,9 +470,8 @@ impl PoltergiftClient {
         if !state.is_sealed() {
             bail!("round is not sealed yet ({}/{} joined)", state.members.len(), state.size);
         }
-        let index = state
-            .member_index(&member.public_key())
-            .ok_or_else(|| anyhow!("this member key is not in the round"))?;
+        let index =
+            state.member_index(&member.public_key()).ok_or_else(|| anyhow!("this member key is not in the round"))?;
         let statement = self.payout_statement(to, state.payout_amount()).await?;
         let message = ring::payout_message(&tari_bor::encode(&statement)?);
         let (signature, key_image) = ring::sign(
@@ -501,11 +492,7 @@ impl PoltergiftClient {
             .with_auto_fill_inputs()
             .build_unsigned();
         let finalized = self.submit_ephemeral(unsigned, component).await?;
-        Ok(Payout {
-            finalized,
-            key_image,
-            output_commitment,
-        })
+        Ok(Payout { finalized, key_image, output_commitment })
     }
 
     /// Takes a member's gift back after the relevant deadline.
@@ -514,16 +501,9 @@ impl PoltergiftClient {
         let statement = self.payout_statement(to, state.payout_amount()).await?;
         let message = ring::payout_message(&tari_bor::encode(&statement)?);
         let public = member.public_key();
-        let (proof, key_image) = ring::sign(
-            Purpose::Refund,
-            &state.round_id_bytes(),
-            &[public],
-            0,
-            member,
-            &message,
-            &mut rand::rng(),
-        )
-        .map_err(|e| anyhow!("signing refund: {e}"))?;
+        let (proof, key_image) =
+            ring::sign(Purpose::Refund, &state.round_id_bytes(), &[public], 0, member, &message, &mut rand::rng())
+                .map_err(|e| anyhow!("signing refund: {e}"))?;
         let output_commitment = *statement.stealth_outputs()[0].commitment();
         let member_pk = RistrettoPublicKeyBytes::from(public);
         let image = RistrettoPublicKeyBytes::from(key_image);
@@ -535,15 +515,15 @@ impl PoltergiftClient {
             .with_auto_fill_inputs()
             .build_unsigned();
         let finalized = self.submit_ephemeral(unsigned, component).await?;
-        Ok(Payout {
-            finalized,
-            key_image,
-            output_commitment,
-        })
+        Ok(Payout { finalized, key_image, output_commitment })
     }
 
     /// Seals with a fresh throwaway key after a dry run, so a bad claim fails before submission.
-    async fn submit_ephemeral(&mut self, unsigned: UnsignedTransaction, component: ComponentAddress) -> Result<Finalized> {
+    async fn submit_ephemeral(
+        &mut self,
+        unsigned: UnsignedTransaction,
+        component: ComponentAddress,
+    ) -> Result<Finalized> {
         let unsigned = self.resolve(unsigned, &Self::round_wants(component)).await?;
         let dry = EphemeralKeySigner::random().seal_transaction(unsigned.clone().with_dry_run(true).finish());
         let result = self.provider.send_dry_run(dry).await?;

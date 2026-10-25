@@ -176,9 +176,8 @@ fn parse_template(s: &str) -> Result<TemplateAddress> {
 }
 
 fn parse_commitment(s: &str) -> Result<PedersenCommitmentBytes> {
-    let bytes: [u8; 32] = hex::decode(s.trim_start_matches("utxo_"))?
-        .try_into()
-        .map_err(|_| anyhow!("commitment must be 32 bytes"))?;
+    let bytes: [u8; 32] =
+        hex::decode(s.trim_start_matches("utxo_"))?.try_into().map_err(|_| anyhow!("commitment must be 32 bytes"))?;
     Ok(PedersenCommitmentBytes::from(bytes))
 }
 
@@ -218,18 +217,18 @@ async fn main() -> Result<()> {
             let (secret, created) = store.load_or_create_wallet(network)?;
             println!("{} wallet in {}", if created { "created" } else { "existing" }, store.dir().display());
             println!("address: {}", secret.to_address());
-        },
+        }
         Command::Balance => {
             let (client, _) = ctx.client().await?;
             println!("address: {}", client.address());
             println!("account: {}", client.account());
             println!("account balance: {}", format_tari(client.account_balance().await?));
-        },
+        }
         Command::Faucet => {
             let (mut client, _) = ctx.client().await?;
             let f = client.take_faucet().await?;
             println!("faucet tx {} (fee {} µT)", f.tx_id, f.fee_paid());
-        },
+        }
         Command::Publish { wasm } => {
             let bytes = std::fs::read(&wasm).with_context(|| format!("reading {}", wasm.display()))?;
             let (mut client, _) = ctx.client().await?;
@@ -239,7 +238,7 @@ async fn main() -> Result<()> {
             if let Some(r) = &ctx.recorder {
                 r.template(&template.to_string(), &f.tx_id.to_string(), &bytes)?;
             }
-        },
+        }
         Command::SendStealth { to, amount } => {
             let (mut client, _) = ctx.client().await?;
             let to = Address::from_str(&to).map_err(|e| anyhow!("bad address: {e}"))?;
@@ -249,7 +248,7 @@ async fn main() -> Result<()> {
             for c in commitments {
                 println!("utxo {}:{}", hex::encode(c.into_array()), format_tari_u64(amount));
             }
-        },
+        }
         Command::Round(cmd) => round_command(&ctx, cmd).await?,
         Command::Inspect { component, member_dirs } => inspect(&ctx, &component, &member_dirs).await?,
         Command::Bots(args) => bots(&ctx, args).await?,
@@ -261,7 +260,7 @@ async fn main() -> Result<()> {
                 println!("utxo {}:{}", hex::encode(o.commitment.into_array()), format_tari_u64(o.value));
             }
             println!("{} stealth outputs, {} in total", owned.len(), format_tari_u64(total));
-        },
+        }
     }
     Ok(())
 }
@@ -272,15 +271,7 @@ fn format_tari_u64(v: u64) -> String {
 
 async fn round_command(ctx: &Ctx, cmd: RoundCmd) -> Result<()> {
     match cmd {
-        RoundCmd::Create {
-            template,
-            gift,
-            size,
-            join_epochs,
-            claim_epochs,
-            claim_fee,
-            label,
-        } => {
+        RoundCmd::Create { template, gift, size, join_epochs, claim_epochs, claim_fee, label } => {
             let (mut client, _) = ctx.client().await?;
             let epoch = client.epoch().await?;
             let params = RoundParams {
@@ -292,16 +283,22 @@ async fn round_command(ctx: &Ctx, cmd: RoundCmd) -> Result<()> {
             };
             let (component, f) = client.create_round(parse_template(&template)?, params).await?;
             println!("{component}");
-            println!("create tx {} (fee {} µT); joins close at epoch {}, claims at epoch {}", f.tx_id, f.fee_paid(), params.join_deadline, params.claim_deadline);
+            println!(
+                "create tx {} (fee {} µT); joins close at epoch {}, claims at epoch {}",
+                f.tx_id,
+                f.fee_paid(),
+                params.join_deadline,
+                params.claim_deadline
+            );
             if let Some(r) = &ctx.recorder {
                 r.round_created(&label, &component.to_string(), &params, &f.tx_id.to_string())?;
             }
-        },
+        }
         RoundCmd::Join { component, from_utxo } => {
             let (mut client, store) = ctx.client().await?;
             let c = parse_component(&component)?;
             join(ctx, &mut client, &store, c, from_utxo.as_deref()).await?;
-        },
+        }
         RoundCmd::Status { component } => {
             let (client, store) = ctx.client().await?;
             let c = parse_component(&component)?;
@@ -312,23 +309,35 @@ async fn round_command(ctx: &Ctx, cmd: RoundCmd) -> Result<()> {
                 let tag = me.key_image(&state.round_id_bytes()).map_err(|e| anyhow!("{e}"))?;
                 let index = state.member_index(&me.public_key());
                 let claimed = state.spent_tags.iter().any(|t| t.into_array() == tag);
-                println!("you: member #{} — tag {} — {}", index.map(|i| i.to_string()).unwrap_or("?".into()), short(&tag), if claimed { "spent" } else { "unspent" });
+                println!(
+                    "you: member #{} — tag {} — {}",
+                    index.map(|i| i.to_string()).unwrap_or("?".into()),
+                    short(&tag),
+                    if claimed { "spent" } else { "unspent" }
+                );
             }
-        },
+        }
         RoundCmd::Claim { component, to } => {
             let (mut client, store) = ctx.client().await?;
             let c = parse_component(&component)?;
             let to = resolve_to(&client, to)?;
-            let mut rec = store.round(&c.to_string())?.ok_or_else(|| anyhow!("no member key for this round in {}", ctx.data_dir.display()))?;
+            let mut rec = store
+                .round(&c.to_string())?
+                .ok_or_else(|| anyhow!("no member key for this round in {}", ctx.data_dir.display()))?;
             let p = client.claim(c, &rec.secret()?, &to).await?;
             rec.claim_tx = Some(p.finalized.tx_id.to_string());
             rec.payout_commitment = Some(hex::encode(p.output_commitment.into_array()));
             store.save_round(&c.to_string(), &rec)?;
-            println!("claim tx {} — tag {} — payout output {}", p.finalized.tx_id, short(&p.key_image), short(&p.output_commitment.into_array()));
+            println!(
+                "claim tx {} — tag {} — payout output {}",
+                p.finalized.tx_id,
+                short(&p.key_image),
+                short(&p.output_commitment.into_array())
+            );
             if let Some(r) = &ctx.recorder {
                 r.payout(&c.to_string(), "claims", &p)?;
             }
-        },
+        }
         RoundCmd::Refund { component, to } => {
             let (mut client, store) = ctx.client().await?;
             let c = parse_component(&component)?;
@@ -342,7 +351,7 @@ async fn round_command(ctx: &Ctx, cmd: RoundCmd) -> Result<()> {
             if let Some(r) = &ctx.recorder {
                 r.payout(&c.to_string(), "refunds", &p)?;
             }
-        },
+        }
     }
     Ok(())
 }
@@ -354,7 +363,13 @@ fn resolve_to(client: &PoltergiftClient, to: Option<String>) -> Result<Address> 
     }
 }
 
-async fn join(ctx: &Ctx, client: &mut PoltergiftClient, store: &Store, c: ComponentAddress, from_utxo: Option<&str>) -> Result<MemberRecord> {
+async fn join(
+    ctx: &Ctx,
+    client: &mut PoltergiftClient,
+    store: &Store,
+    c: ComponentAddress,
+    from_utxo: Option<&str>,
+) -> Result<MemberRecord> {
     if let Some(existing) = store.round(&c.to_string())? {
         bail!("this data dir already joined the round as {}", existing.member_public);
     }
@@ -371,7 +386,7 @@ async fn join(ctx: &Ctx, client: &mut PoltergiftClient, store: &Store, c: Compon
             let (commitment, value) = spec.split_once(':').ok_or_else(|| anyhow!("use COMMITMENT:VALUE"))?;
             let f = client.join_from_stealth(c, &member, parse_commitment(commitment)?, parse_tari(value)?).await?;
             (f, "stealth")
-        },
+        }
         None => (client.join_from_account(c, &member).await?, "account"),
     };
     rec.join_tx = Some(f.tx_id.to_string());
@@ -393,7 +408,12 @@ async fn print_status(client: &PoltergiftClient, state: &RoundState) -> Result<(
     let balance = client.vault_balance(state).await?;
     println!("phase: {} (epoch {epoch})", state.phase(epoch));
     println!("members: {}/{}  claims: {}  refunds: {}", state.members.len(), state.size, state.claims, state.refunds);
-    println!("gift: {}  claim fee: {}  payout: {}", format_tari(state.gift_amount), format_tari(state.claim_fee), format_tari(state.payout_amount()));
+    println!(
+        "gift: {}  claim fee: {}  payout: {}",
+        format_tari(state.gift_amount),
+        format_tari(state.claim_fee),
+        format_tari(state.payout_amount())
+    );
     println!("joins close at epoch {}, claims close at epoch {}", state.join_deadline, state.claim_deadline);
     println!("vault: {}", format_tari(balance));
     Ok(())
@@ -414,7 +434,11 @@ async fn inspect(ctx: &Ctx, component: &str, member_dirs: &[PathBuf]) -> Result<
         println!("  {}", short(&t.into_array()));
     }
     let (_, h) = ring::tag_base(&state.round_id_bytes()).map_err(|e| anyhow!("{e}"))?;
-    println!("tag base H = {} (recomputed from the round id; matches state: {})", short(&h), h == state.tag_base.into_array());
+    println!(
+        "tag base H = {} (recomputed from the round id; matches state: {})",
+        short(&h),
+        h == state.tag_base.into_array()
+    );
     println!("deciding which member owns a tag means solving DDH in (G, H, P_i, I): an observer cannot.");
     if member_dirs.is_empty() {
         return Ok(());

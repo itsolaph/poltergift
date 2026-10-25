@@ -6,24 +6,19 @@
 use poltergift_ring::{self as ring, Purpose, SecretKey};
 use rand_chacha::ChaCha20Rng;
 use rand_core::SeedableRng;
+use tari_template_test_tooling::engine_types::virtual_substate::{VirtualSubstate, VirtualSubstateId};
 use tari_template_test_tooling::{
     TemplateTest,
-    crypto::{PublicKey as _, RistrettoPublicKey, RistrettoSecretKey},
     byte_type::ToByteType,
+    crypto::{PublicKey as _, RistrettoPublicKey, RistrettoSecretKey},
     engine_types::commit_result::{ExecuteResult, RejectReason},
     support::{assert_error::assert_reject_reason, stealth},
     template_lib_types::{
-        Amount,
-        ComponentAddress,
-        NonFungibleAddress,
-        TemplateAddress,
-        constants::TARI_TOKEN,
-        crypto::RistrettoPublicKeyBytes,
-        stealth::StealthTransferStatement,
+        Amount, ComponentAddress, NonFungibleAddress, TemplateAddress, constants::TARI_TOKEN,
+        crypto::RistrettoPublicKeyBytes, stealth::StealthTransferStatement,
     },
     transaction::{Transaction, args},
 };
-use tari_template_test_tooling::engine_types::virtual_substate::{VirtualSubstate, VirtualSubstateId};
 
 pub const GIFT: u64 = 5_000_000;
 pub const FEE: u64 = 20_000;
@@ -101,24 +96,28 @@ impl Harness {
     }
 
     pub fn set_epoch(&mut self, epoch: u64) {
-        self.test
-            .set_virtual_substate(VirtualSubstateId::CurrentEpoch, VirtualSubstate::CurrentEpoch(epoch));
+        self.test.set_virtual_substate(VirtualSubstateId::CurrentEpoch, VirtualSubstate::CurrentEpoch(epoch));
     }
 
     pub fn new_member(&mut self) -> SecretKey {
         SecretKey::random(&mut self.rng)
     }
 
-    pub fn try_create(&mut self, gift: u64, size: u32, join_deadline: u64, claim_deadline: u64, fee: u64) -> Result<ComponentAddress, RejectReason> {
+    pub fn try_create(
+        &mut self,
+        gift: u64,
+        size: u32,
+        join_deadline: u64,
+        claim_deadline: u64,
+        fee: u64,
+    ) -> Result<ComponentAddress, RejectReason> {
         let tx = self
             .account_tx()
-            .call_function(self.template, "create", args![
-                Amount::from(gift),
-                size,
-                join_deadline,
-                claim_deadline,
-                Amount::from(fee)
-            ])
+            .call_function(
+                self.template,
+                "create",
+                args![Amount::from(gift), size, join_deadline, claim_deadline, Amount::from(fee)],
+            )
             .build_and_seal(&self.account_key);
         let result = self.test.execute_and_commit_on_success(tx, vec![]);
         match result.finalize.any_reject() {
@@ -133,22 +132,24 @@ impl Harness {
                     })
                     .expect("round component in diff");
                 Ok(component)
-            },
+            }
         }
     }
 
     /// Creates a round with the default parameters and no members yet.
     pub fn create_round(&mut self, size: u32) -> Round {
         let component = self.try_create(GIFT, size, JOIN_DEADLINE, CLAIM_DEADLINE, FEE).expect("create");
-        Round {
-            component,
-            round_id: component.as_object_key().into_array(),
-            members: Vec::new(),
-        }
+        Round { component, round_id: component.as_object_key().into_array(), members: Vec::new() }
     }
 
     /// Joins with `gift_amount` withdrawn from the funded account, an arbitrary member key and PoP.
-    pub fn try_join_raw(&mut self, component: ComponentAddress, member: [u8; 32], pop: Vec<u8>, gift_amount: u64) -> Result<ExecuteResult, RejectReason> {
+    pub fn try_join_raw(
+        &mut self,
+        component: ComponentAddress,
+        member: [u8; 32],
+        pop: Vec<u8>,
+        gift_amount: u64,
+    ) -> Result<ExecuteResult, RejectReason> {
         let tx = self
             .account_tx()
             .call_method(self.account, "withdraw", args![TARI_TOKEN, Amount::from(gift_amount)])
@@ -188,7 +189,13 @@ impl Harness {
     }
 
     /// Submits a claim the way the client does: in the fee intent, sealed by a throwaway key.
-    pub fn submit_claim(&mut self, component: ComponentAddress, key_image: [u8; 32], signature: Vec<u8>, statement: StealthTransferStatement) -> Result<ExecuteResult, RejectReason> {
+    pub fn submit_claim(
+        &mut self,
+        component: ComponentAddress,
+        key_image: [u8; 32],
+        signature: Vec<u8>,
+        statement: StealthTransferStatement,
+    ) -> Result<ExecuteResult, RejectReason> {
         let key = self.ephemeral_key();
         let tx = self
             .test
@@ -200,7 +207,14 @@ impl Harness {
         self.execute(tx, vec![])
     }
 
-    pub fn submit_refund(&mut self, component: ComponentAddress, member: [u8; 32], key_image: [u8; 32], proof: Vec<u8>, statement: StealthTransferStatement) -> Result<ExecuteResult, RejectReason> {
+    pub fn submit_refund(
+        &mut self,
+        component: ComponentAddress,
+        member: [u8; 32],
+        key_image: [u8; 32],
+        proof: Vec<u8>,
+        statement: StealthTransferStatement,
+    ) -> Result<ExecuteResult, RejectReason> {
         let key = self.ephemeral_key();
         let tx = self
             .test
@@ -213,7 +227,12 @@ impl Harness {
     }
 
     /// Member `index` signs a claim for `statement`.
-    pub fn sign_claim(&mut self, round: &Round, index: usize, statement: &StealthTransferStatement) -> ([u8; 32], Vec<u8>) {
+    pub fn sign_claim(
+        &mut self,
+        round: &Round,
+        index: usize,
+        statement: &StealthTransferStatement,
+    ) -> ([u8; 32], Vec<u8>) {
         let msg = payout_message(statement);
         let (sig, image) = ring::sign(
             Purpose::Claim,
@@ -234,19 +253,17 @@ impl Harness {
         self.submit_claim(round.component, image, sig, statement)
     }
 
-    pub fn sign_refund(&mut self, round: &Round, index: usize, statement: &StealthTransferStatement) -> ([u8; 32], Vec<u8>) {
+    pub fn sign_refund(
+        &mut self,
+        round: &Round,
+        index: usize,
+        statement: &StealthTransferStatement,
+    ) -> ([u8; 32], Vec<u8>) {
         let msg = payout_message(statement);
         let member = &round.members[index];
-        let (sig, image) = ring::sign(
-            Purpose::Refund,
-            &round.round_id,
-            &[member.public_key()],
-            0,
-            member,
-            &msg,
-            &mut self.rng,
-        )
-        .unwrap();
+        let (sig, image) =
+            ring::sign(Purpose::Refund, &round.round_id, &[member.public_key()], 0, member, &msg, &mut self.rng)
+                .unwrap();
         (image, sig.to_bytes())
     }
 
@@ -267,7 +284,11 @@ impl Harness {
     }
 
     /// Calls a read-only method. Views are free in tests, so fees are paused around the call.
-    fn view<T: serde::de::DeserializeOwned + for<'b> tari_bor::Decode<'b, ()>>(&mut self, component: ComponentAddress, method: &str) -> T {
+    fn view<T: serde::de::DeserializeOwned + for<'b> tari_bor::Decode<'b, ()>>(
+        &mut self,
+        component: ComponentAddress,
+        method: &str,
+    ) -> T {
         if self.account_fee.is_some() {
             self.test.disable_fees();
         }

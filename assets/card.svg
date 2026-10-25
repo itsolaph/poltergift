@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="Poltergift: a secret gift exchange on the Tari Ootle">
+  <defs>
+    <radialGradient id="glowL" cx="18%" cy="20%" r="60%">
+      <stop offset="0" stop-color="#4b2f8f" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#0a0910" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowR" cx="88%" cy="85%" r="55%">
+      <stop offset="0" stop-color="#1d6b4a" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#0a0910" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ghostFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cfc6ff"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <symbol id="g" viewBox="0 0 64 64">
+      <path d="M32 6c-12 0-20 9-20 21v27l6-5 5 5 5-5 4 5 4-5 5 5 5-5 6 5V27C52 15 44 6 32 6z"/>
+    </symbol>
+  </defs>
+
+  <rect width="1200" height="420" rx="28" fill="#0a0910"/>
+  <rect width="1200" height="420" rx="28" fill="url(#glowL)"/>
+  <rect width="1200" height="420" rx="28" fill="url(#glowR)"/>
+
+  <!-- faint ring of ghosts -->
+  <g fill="#e9e4ff" opacity="0.10">
+    <use href="#g" x="840" y="40" width="70" height="70"/>
+    <use href="#g" x="1010" y="70" width="60" height="60"/>
+    <use href="#g" x="1070" y="220" width="70" height="70"/>
+    <use href="#g" x="930" y="300" width="56" height="56"/>
+    <use href="#g" x="790" y="230" width="62" height="62"/>
+  </g>
+  <g stroke="#b18cff" stroke-opacity="0.18" stroke-width="2" fill="none" stroke-dasharray="4 8">
+    <circle cx="955" cy="200" r="150"/>
+  </g>
+
+  <!-- main ghost holding a gift -->
+  <g transform="translate(880,105)">
+    <ellipse cx="75" cy="200" rx="58" ry="10" fill="#000" opacity="0.45"/>
+    <use href="#g" x="-10" y="-10" width="170" height="170" fill="#b18cff" opacity="0.35" filter="url(#soft)"/>
+    <use href="#g" x="0" y="0" width="150" height="150" fill="url(#ghostFill)"/>
+    <circle cx="58" cy="62" r="8" fill="#120f1d"/>
+    <circle cx="92" cy="62" r="8" fill="#120f1d"/>
+    <path d="M62 84 q13 10 26 0" stroke="#120f1d" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <g transform="translate(46,98)">
+      <rect x="0" y="12" width="58" height="42" rx="6" fill="#7cffb2"/>
+      <rect x="25" y="12" width="8" height="42" fill="#0f3d2a"/>
+      <rect x="-4" y="4" width="66" height="12" rx="4" fill="#5ae09a"/>
+      <path d="M29 4 C 14 -12, 4 2, 29 4 C 54 2, 44 -12, 29 4" fill="#5ae09a" stroke="#0f3d2a" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- text -->
+  <text x="72" y="150" fill="#ebe8f5" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="78" font-weight="800" letter-spacing="1">Poltergift</text>
+  <text x="76" y="200" fill="#b9b4d0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26">A secret gift exchange on the Tari Ootle.</text>
+  <text x="76" y="236" fill="#8f8aa8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="22">Nobody, not even the chain, knows who gave what to whom.</text>
+
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" font-weight="600">
+    <g transform="translate(76,282)">
+      <rect width="258" height="40" rx="20" fill="#1d1832" stroke="#4b3c85"/>
+      <text x="129" y="26" text-anchor="middle" fill="#cdb8ff">ring signatures on chain</text>
+    </g>
+    <g transform="translate(348,282)">
+      <rect width="272" height="40" rx="20" fill="#13281e" stroke="#2c6b4b"/>
+      <text x="136" y="26" text-anchor="middle" fill="#7cffb2">unlinkable stealth payouts</text>
+    </g>
+    <g transform="translate(634,282)">
+      <rect width="190" height="40" rx="20" fill="#2a2210" stroke="#6b5520"/>
+      <text x="95" y="26" text-anchor="middle" fill="#ffc56b">live on Esmeralda</text>
+    </g>
+  </g>
+  <text x="76" y="372" fill="#5f5a78" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="15">LSAG · Ristretto255 · one-time tags · vault-paid fees · deadline refunds</text>
+</svg>

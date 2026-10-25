@@ -17,11 +17,9 @@ pub fn parse_tari(s: &str) -> Result<u64> {
         bail!("at most 6 decimal places (1 µT)");
     }
     let whole: u64 = if whole.is_empty() { 0 } else { whole.parse().map_err(|_| anyhow!("bad amount {s:?}"))? };
-    let frac: u64 = if frac.is_empty() { 0 } else { format!("{frac:0<6}").parse().map_err(|_| anyhow!("bad amount {s:?}"))? };
-    whole
-        .checked_mul(MICRO)
-        .and_then(|w| w.checked_add(frac))
-        .ok_or_else(|| anyhow!("amount too large"))
+    let frac: u64 =
+        if frac.is_empty() { 0 } else { format!("{frac:0<6}").parse().map_err(|_| anyhow!("bad amount {s:?}"))? };
+    whole.checked_mul(MICRO).and_then(|w| w.checked_add(frac)).ok_or_else(|| anyhow!("amount too large"))
 }
 
 pub fn format_tari(a: Amount) -> String {

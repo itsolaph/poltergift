@@ -29,17 +29,14 @@ const FEE: u64 = 50_000;
 const ROUND_ID: [u8; 32] = [0x42; 32];
 
 fn round(size: u32) -> (Value, Vec<Ghost>) {
-    let params = json!({"gift_amount": GIFT, "size": size, "join_deadline": 10, "claim_deadline": 20, "claim_fee": FEE});
+    let params =
+        json!({"gift_amount": GIFT, "size": size, "join_deadline": 10, "claim_deadline": 20, "claim_fee": FEE});
     let created = req(json!({"op": "create", "params": params, "round_id": hex::encode(ROUND_ID), "now": 1}));
     assert_eq!(created["ok"], true, "{created}");
     let mut state = created["state"].clone();
     let mut ghosts = Vec::new();
     for g in 0..size as u8 {
-        let ghost = Ghost {
-            member: keygen(10 + g),
-            view: keygen(50 + g),
-            spend: keygen(90 + g),
-        };
+        let ghost = Ghost { member: keygen(10 + g), view: keygen(50 + g), spend: keygen(90 + g) };
         let r = req(json!({"op": "join", "state": state, "now": 2, "member": ghost.member.1,
             "pop_secret": ghost.member.0, "gift": GIFT, "seed": seed(130 + g)}));
         assert_eq!(r["ok"], true, "{r}");
@@ -74,7 +71,9 @@ fn five_ghosts_full_round_and_private_gifts() {
     assert_eq!(view["ok"], true);
     for (owner, output) in &outputs {
         for (g, ghost) in ghosts.iter().enumerate() {
-            let opened = req(json!({"op": "open", "view_secret": ghost.view.0, "spend_public": ghost.spend.1, "output": output}));
+            let opened = req(
+                json!({"op": "open", "view_secret": ghost.view.0, "spend_public": ghost.spend.1, "output": output}),
+            );
             if g == *owner {
                 assert_eq!(opened["amount"], GIFT - FEE);
             } else {
@@ -94,7 +93,9 @@ fn double_claim_and_redirect_rejected_with_template_messages() {
 
     // Redirect: keep ghost 0's signature, swap in a payout to a thief's wallet.
     let ring: Vec<String> = ghosts.iter().map(|g| g.member.1.clone()).collect();
-    let honest = req(json!({"op": "payout", "view_public": ghosts[0].view.1, "spend_public": ghosts[0].spend.1, "amount": GIFT - FEE, "seed": seed(1)}));
+    let honest = req(
+        json!({"op": "payout", "view_public": ghosts[0].view.1, "spend_public": ghosts[0].spend.1, "amount": GIFT - FEE, "seed": seed(1)}),
+    );
     let signed = req(json!({"op": "sign_claim", "round_id": hex::encode(ROUND_ID), "ring": ring, "index": 0,
         "secret": ghosts[0].member.0, "message": honest["message"], "seed": seed(2)}));
     let r = req(json!({"op": "claim", "state": state2, "now": 3, "key_image": signed["key_image"],

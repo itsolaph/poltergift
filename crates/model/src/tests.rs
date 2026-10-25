@@ -8,13 +8,7 @@ const GIFT: u128 = 5_000_000;
 const FEE: u128 = 20_000;
 
 fn params(size: u32) -> Params {
-    Params {
-        gift_amount: GIFT,
-        size,
-        join_deadline: 10,
-        claim_deadline: 20,
-        claim_fee: FEE,
-    }
+    Params { gift_amount: GIFT, size, join_deadline: 10, claim_deadline: 20, claim_fee: FEE }
 }
 
 fn filled(size: u32, rng: &mut ChaCha20Rng) -> (RoundModel, Vec<SecretKey>) {
@@ -56,10 +50,7 @@ fn double_claim_and_wrong_shape_rejected_with_template_messages() {
     assert_eq!(claim(&mut round, &keys, 1, &mut rng), Err(Rejected(msg::TAG_SPENT)));
     let mut shape = PayoutShape::valid(round.payout_amount());
     shape.stealth_outputs = 2;
-    assert_eq!(
-        round.claim(2, [9u8; 32], &[0u8; 128], &shape, &[0u8; 32], 0),
-        Err(Rejected(msg::PAYOUT_OUTPUTS))
-    );
+    assert_eq!(round.claim(2, [9u8; 32], &[0u8; 128], &shape, &[0u8; 32], 0), Err(Rejected(msg::PAYOUT_OUTPUTS)));
 }
 
 #[test]

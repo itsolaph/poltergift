@@ -6,17 +6,17 @@ mod common;
 use common::*;
 use poltergift_ring::{self as ring, Purpose, SecretKey};
 use tari_template_test_tooling::{
+    crypto::{RistrettoSecretKey, SecretKey as _},
     support::stealth,
     template_lib_types::{Amount, constants::TARI_TOKEN},
     transaction::args,
     wallet_crypto::MaskAndValue,
-    crypto::{RistrettoSecretKey, SecretKey as _},
 };
 
 /// The group order `l`, little endian.
 const L: [u8; 32] = [
-    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0x10,
+    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10,
 ];
 
 /// `s + l`, a second encoding of the same scalar, or `None` if it would not fit in 256 bits.
@@ -83,13 +83,11 @@ fn create_rejects_gift_too_large_for_a_stealth_output() {
     let tx = h
         .test
         .transaction()
-        .call_function(h.template, "create", args![
-            Amount::new(u64::MAX as u128 + 1),
-            3u32,
-            JOIN_DEADLINE,
-            CLAIM_DEADLINE,
-            Amount::from(FEE)
-        ])
+        .call_function(
+            h.template,
+            "create",
+            args![Amount::new(u64::MAX as u128 + 1), 3u32, JOIN_DEADLINE, CLAIM_DEADLINE, Amount::from(FEE)],
+        )
         .build_and_seal(&h.account_key.clone());
     assert_reject_reason_str(h.execute(tx, vec![]), "gift amount too large");
 }
@@ -271,8 +269,7 @@ fn claim_rejects_outsider_who_substitutes_own_key_into_ring() {
     fake_ring[0] = outsider.public_key();
     let statement = payout(PAYOUT);
     let msg = payout_message(&statement);
-    let (sig, image) =
-        ring::sign(Purpose::Claim, &round.round_id, &fake_ring, 0, &outsider, &msg, &mut h.rng).unwrap();
+    let (sig, image) = ring::sign(Purpose::Claim, &round.round_id, &fake_ring, 0, &outsider, &msg, &mut h.rng).unwrap();
     let r = h.submit_claim(round.component, image, sig.to_bytes(), statement);
     assert_reject_reason_str(r, "ring signature does not verify");
 }
@@ -422,13 +419,8 @@ fn claim_rejects_payout_that_spends_extra_stealth_inputs() {
     let mut h = Harness::new();
     let round = h.full_round(3);
     let mask = RistrettoSecretKey::random(&mut h.rng);
-    let mixed = stealth::generate_transfer_data(
-        [MaskAndValue { mask, value: 1_000 }],
-        PAYOUT,
-        [PAYOUT + 1_000],
-        0u64,
-    )
-    .statement;
+    let mixed = stealth::generate_transfer_data([MaskAndValue { mask, value: 1_000 }], PAYOUT, [PAYOUT + 1_000], 0u64)
+        .statement;
     let (image, sig) = h.sign_claim(&round, 0, &mixed);
     let r = h.submit_claim(round.component, image, sig, mixed);
     assert_reject_reason_str(r, "payout must not spend stealth inputs");
@@ -516,12 +508,7 @@ fn claim_events_and_state_carry_no_identity() {
     let mut h = Harness::new();
     let round = h.full_round(3);
     let result = h.claim(&round, 1).unwrap();
-    let claim_events: Vec<_> = result
-        .finalize
-        .events
-        .iter()
-        .filter(|e| e.topic().contains("Claimed"))
-        .collect();
+    let claim_events: Vec<_> = result.finalize.events.iter().filter(|e| e.topic().contains("Claimed")).collect();
     assert_eq!(claim_events.len(), 1);
     let payload = claim_events[0].payload();
     let keys: Vec<_> = payload.iter().map(|(k, _)| k.to_string()).collect();
@@ -606,16 +593,8 @@ fn refund_rejects_outsider_stealing_a_members_gift() {
     let outsider = h.new_member();
     let statement = payout(PAYOUT);
     let msg = payout_message(&statement);
-    let (proof, image) = ring::sign(
-        Purpose::Refund,
-        &round.round_id,
-        &[outsider.public_key()],
-        0,
-        &outsider,
-        &msg,
-        &mut h.rng,
-    )
-    .unwrap();
+    let (proof, image) =
+        ring::sign(Purpose::Refund, &round.round_id, &[outsider.public_key()], 0, &outsider, &msg, &mut h.rng).unwrap();
     let victim = round.members[0].public_key();
     let r = h.submit_refund(round.component, victim, image, proof.to_bytes(), statement);
     assert_reject_reason_str(r, "ring signature does not verify");
@@ -629,16 +608,8 @@ fn refund_rejects_non_member_key() {
     let outsider = h.new_member();
     let statement = payout(PAYOUT);
     let msg = payout_message(&statement);
-    let (proof, image) = ring::sign(
-        Purpose::Refund,
-        &round.round_id,
-        &[outsider.public_key()],
-        0,
-        &outsider,
-        &msg,
-        &mut h.rng,
-    )
-    .unwrap();
+    let (proof, image) =
+        ring::sign(Purpose::Refund, &round.round_id, &[outsider.public_key()], 0, &outsider, &msg, &mut h.rng).unwrap();
     let r = h.submit_refund(round.component, outsider.public_key(), image, proof.to_bytes(), statement);
     assert_reject_reason_str(r, "not a member of this round");
 }
@@ -758,13 +729,16 @@ fn stealth_funded_join_uses_no_account() {
 }
 
 #[track_caller]
-fn assert_reject_reason_str<T>(result: Result<T, tari_template_test_tooling::engine_types::commit_result::RejectReason>, reason: &str) {
+fn assert_reject_reason_str<T>(
+    result: Result<T, tari_template_test_tooling::engine_types::commit_result::RejectReason>,
+    reason: &str,
+) {
     match result {
         Ok(_) => panic!("expected rejection containing {reason:?}, but it succeeded"),
         Err(r) => {
             let s = r.to_string();
             assert!(s.contains(reason), "expected reject reason containing {reason:?}, got {s:?}");
-        },
+        }
     }
 }
 

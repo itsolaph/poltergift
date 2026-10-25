@@ -24,8 +24,8 @@ fn members(n: usize, seed: u64) -> (Vec<SecretKey>, Vec<PointBytes>) {
 /// The group order `l`, little endian. Adding it to a canonical scalar gives a non-canonical
 /// encoding of the same value.
 const L: [u8; 32] = [
-    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0x10,
+    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10,
 ];
 
 fn add_l(bytes: &ScalarBytes) -> Option<ScalarBytes> {
@@ -141,23 +141,14 @@ fn rejects_wrong_lengths_and_sizes() {
     assert_eq!(RingSignature::from_bytes(&sig.to_bytes()).unwrap(), sig);
     assert_eq!(verify(Purpose::Claim, &ROUND, &[], &image, &MSG, &sig), Err(Error::RingSize));
     let (_, big) = members(MAX_RING_SIZE + 1, 9);
-    assert_eq!(
-        sign(Purpose::Claim, &ROUND, &big, 0, &sks[0], &MSG, &mut rng(1)).unwrap_err(),
-        Error::RingSize
-    );
+    assert_eq!(sign(Purpose::Claim, &ROUND, &big, 0, &sks[0], &MSG, &mut rng(1)).unwrap_err(), Error::RingSize);
 }
 
 #[test]
 fn signer_must_be_in_ring() {
     let (sks, ring) = members(3, 10);
-    assert_eq!(
-        sign(Purpose::Claim, &ROUND, &ring, 1, &sks[0], &MSG, &mut rng(1)).unwrap_err(),
-        Error::SignerMismatch
-    );
-    assert_eq!(
-        sign(Purpose::Claim, &ROUND, &ring, 3, &sks[0], &MSG, &mut rng(1)).unwrap_err(),
-        Error::SignerIndex
-    );
+    assert_eq!(sign(Purpose::Claim, &ROUND, &ring, 1, &sks[0], &MSG, &mut rng(1)).unwrap_err(), Error::SignerMismatch);
+    assert_eq!(sign(Purpose::Claim, &ROUND, &ring, 3, &sks[0], &MSG, &mut rng(1)).unwrap_err(), Error::SignerIndex);
 }
 
 #[test]

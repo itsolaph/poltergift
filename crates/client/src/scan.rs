@@ -17,18 +17,13 @@ use ootle_rs::{
     provider::{ShardCursor, StealthUtxoFrame, StealthUtxoWatchRequest},
 };
 use tari_crypto::ristretto::RistrettoPublicKey;
-use tari_ootle_common_types::{
-    Epoch,
-    engine_types::substate::SubstateValue,
-    shard::Shard,
-    StateVersion,
-};
+use tari_ootle_common_types::engine_types::crypto::OutputBody;
+use tari_ootle_common_types::{Epoch, StateVersion, engine_types::substate::SubstateValue, shard::Shard};
 use tari_template_lib_types::{
     UtxoAddress,
     constants::TARI_TOKEN,
     crypto::{PedersenCommitmentBytes, RistrettoPublicKeyBytes, UtxoTag},
 };
-use tari_ootle_common_types::engine_types::crypto::OutputBody;
 
 use crate::client::PoltergiftClient;
 
@@ -55,33 +50,26 @@ impl PoltergiftClient {
     /// Opens the output at `commitment` with this wallet's view key. `Ok(None)` means the output
     /// exists but is not ours (it does not decrypt); an error means it is gone (spent) or unknown.
     pub async fn open_output(&self, commitment: PedersenCommitmentBytes) -> Result<Option<OwnedOutput>> {
-        let substate = self
-            .provider()
-            .fetch_substate(UtxoAddress::new(TARI_TOKEN, commitment.into()))
-            .await?;
+        let substate = self.provider().fetch_substate(UtxoAddress::new(TARI_TOKEN, commitment.into())).await?;
         match substate.into_substate_value() {
             SubstateValue::Utxo(utxo) => {
                 let output = utxo.output.ok_or_else(|| anyhow!("output was burnt"))?;
                 Ok(self.open_body(commitment, output.output()))
-            },
+            }
             other => Err(anyhow!("not a UTXO: {other:?}")),
         }
     }
 
     fn tag_for(&self, public_nonce: &RistrettoPublicKeyBytes) -> Option<UtxoTag> {
         let nonce: RistrettoPublicKey = public_nonce.try_from_byte_type().ok()?;
-        Some(kdfs::utxo_tag_stealth_dh(
-            self.network(),
-            &nonce,
-            self.secret().view_only_secret(),
-            &TARI_TOKEN,
-        ))
+        Some(kdfs::utxo_tag_stealth_dh(self.network(), &nonce, self.secret().view_only_secret(), &TARI_TOKEN))
     }
 
     /// Scans every unspent TARI output for ones this wallet owns.
     pub async fn scan_owned(&self) -> Result<Vec<OwnedOutput>> {
         let preshards = self.provider().get_num_preshards().await?;
-        let mut cursors: BTreeMap<Shard, StateVersion> = ShardCursor::genesis(preshards).to_pairs().into_iter().collect();
+        let mut cursors: BTreeMap<Shard, StateVersion> =
+            ShardCursor::genesis(preshards).to_pairs().into_iter().collect();
         let mut candidates = Vec::new();
         loop {
             let request = StealthUtxoWatchRequest {
@@ -100,11 +88,11 @@ impl PoltergiftClient {
                         if self.tag_for(&public_nonce) == Some(tag) {
                             candidates.push((tag, public_nonce));
                         }
-                    },
+                    }
                     StealthUtxoFrame::EndOfShard { shard, max_state_version } => {
                         cursors.insert(shard, max_state_version);
-                    },
-                    StealthUtxoFrame::Spent { .. } | StealthUtxoFrame::Burnt { .. } => {},
+                    }
+                    StealthUtxoFrame::Spent { .. } | StealthUtxoFrame::Burnt { .. } => {}
                 }
             }
             if !more {

@@ -11,9 +11,7 @@ mod fake_token {
 
     impl FakeToken {
         pub fn mint(amount: Amount) -> Bucket {
-            ResourceBuilder::public_fungible()
-                .with_token_symbol("TARI")
-                .initial_supply(amount)
+            ResourceBuilder::public_fungible().with_token_symbol("TARI").initial_supply(amount)
         }
     }
 }

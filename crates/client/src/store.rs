@@ -38,9 +38,8 @@ pub struct MemberRecord {
 
 impl MemberRecord {
     pub fn secret(&self) -> Result<SecretKey> {
-        let bytes: [u8; 32] = hex::decode(&self.member_secret)?
-            .try_into()
-            .map_err(|_| anyhow!("member secret must be 32 bytes"))?;
+        let bytes: [u8; 32] =
+            hex::decode(&self.member_secret)?.try_into().map_err(|_| anyhow!("member secret must be 32 bytes"))?;
         SecretKey::from_bytes(&bytes).map_err(|e| anyhow!("invalid member secret: {e}"))
     }
 }

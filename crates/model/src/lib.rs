@@ -66,13 +66,7 @@ pub struct PayoutShape {
 impl PayoutShape {
     /// The only shape the template accepts for a round: one output funded by exactly `amount`.
     pub fn valid(amount: u128) -> Self {
-        Self {
-            stealth_inputs: 0,
-            covenant_claims: 0,
-            revealed_output: 0,
-            stealth_outputs: 1,
-            revealed_input: amount,
-        }
+        Self { stealth_inputs: 0, covenant_claims: 0, revealed_output: 0, stealth_outputs: 1, revealed_input: amount }
     }
 }
 
@@ -180,11 +174,9 @@ fn verify_with_template_semantics(
     ensure!(signature.len() == 32 * (n + 1), msg::SIG_LENGTH);
     ensure!(is_valid_point(key_image), msg::BAD_KEY_IMAGE);
     let sig = RingSignature::from_bytes(signature).map_err(|_| Rejected(msg::SIG_LENGTH))?;
-    ensure!(
-        core::iter::once(&sig.c0).chain(&sig.s).all(|s| ring::decode_scalar(s).is_ok()),
-        msg::SCALAR
-    );
-    ring::verify(purpose, round_id, ring_keys, key_image, message, &sig).map_err(|e| Rejected(ring_error_message(e, true)))
+    ensure!(core::iter::once(&sig.c0).chain(&sig.s).all(|s| ring::decode_scalar(s).is_ok()), msg::SCALAR);
+    ring::verify(purpose, round_id, ring_keys, key_image, message, &sig)
+        .map_err(|e| Rejected(ring_error_message(e, true)))
 }
 
 impl RoundModel {
@@ -213,13 +205,7 @@ impl RoundModel {
     }
 
     pub fn status(&self) -> Status {
-        (
-            self.members.len() as u32,
-            self.params.size,
-            self.claims,
-            self.refunds,
-            self.ring_hash.is_some(),
-        )
+        (self.members.len() as u32, self.params.size, self.claims, self.refunds, self.ring_hash.is_some())
     }
 
     pub fn is_sealed(&self) -> bool {
@@ -306,11 +292,7 @@ impl RoundModel {
         } else {
             ensure!(now >= self.params.join_deadline, msg::OPEN_BEFORE_JOIN_DEADLINE);
         }
-        let index = self
-            .members
-            .iter()
-            .position(|m| *m == member)
-            .ok_or(Rejected(msg::NOT_MEMBER))? as u32;
+        let index = self.members.iter().position(|m| *m == member).ok_or(Rejected(msg::NOT_MEMBER))? as u32;
         ensure!(!self.refunded.contains(&index), msg::ALREADY_REFUNDED);
         ensure!(!self.spent_tags.contains(&key_image), msg::TAG_SPENT);
         self.check_payout(payout)?;

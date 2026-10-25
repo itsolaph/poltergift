@@ -65,7 +65,9 @@ async fn get_json(http: &reqwest::Client, url: &str) -> Result<Value> {
 async fn signers(http: &reqwest::Client, indexer: &str, tx: &str) -> Result<Vec<String>> {
     let v = get_json(http, &format!("{indexer}/transactions/{tx}")).await?;
     let body = &v["transaction"]["transaction"]["V1"];
-    let mut keys = vec![body["seal_signature"]["public_key"].as_str().ok_or_else(|| anyhow!("no seal signer in {tx}"))?.to_string()];
+    let mut keys = vec![
+        body["seal_signature"]["public_key"].as_str().ok_or_else(|| anyhow!("no seal signer in {tx}"))?.to_string(),
+    ];
     if let Some(sigs) = body["body"]["signatures"].as_array() {
         keys.extend(sigs.iter().filter_map(|s| s["public_key"].as_str().map(str::to_string)));
     }
@@ -83,11 +85,17 @@ fn strs<'a>(v: &'a Value, list: &str, field: &str) -> Vec<&'a str> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let a = args()?;
-    let record: Value = serde_json::from_str(&std::fs::read_to_string(&a.record).with_context(|| format!("reading {}", a.record.display()))?)?;
+    let record: Value = serde_json::from_str(
+        &std::fs::read_to_string(&a.record).with_context(|| format!("reading {}", a.record.display()))?,
+    )?;
     let http = reqwest::Client::new();
     // A throwaway wallet: reading needs no keys, and the provider verifies every substate it returns.
     let reader = PoltergiftClient::connect_with_trust(&a.indexer, OotleSecretKey::random(a.network), a.trust).await?;
-    let mode = if matches!(a.trust, IndexerTrust::Verify) { "light-client verified reads" } else { "trusted indexer (rehearsal)" };
+    let mode = if matches!(a.trust, IndexerTrust::Verify) {
+        "light-client verified reads"
+    } else {
+        "trusted indexer (rehearsal)"
+    };
     println!("indexer {} — {mode} — epoch {}", a.indexer, reader.epoch().await?);
     if let Some(t) = record["template"]["address"].as_str() {
         println!("template {t}");
@@ -106,20 +114,42 @@ async fn main() -> Result<()> {
         println!("\n== {} — {component_str}", round["label"].as_str().unwrap_or("round"));
         let state = reader.round_state(component).await?;
         let vault = reader.vault_balance(&state).await?;
-        println!("  members {}/{}  claims {}  refunds {}  vault {} µT", state.members.len(), state.size, state.claims, state.refunds, vault.to_u128());
+        println!(
+            "  members {}/{}  claims {}  refunds {}  vault {} µT",
+            state.members.len(),
+            state.size,
+            state.claims,
+            state.refunds,
+            vault.to_u128()
+        );
 
         let on_chain_members: Vec<String> = state.members.iter().map(|m| hex::encode(m.into_array())).collect();
         let on_chain_tags: HashSet<String> = state.spent_tags.iter().map(|t| hex::encode(t.into_array())).collect();
         let joins = strs(&round, "joins", "member_key");
-        check(joins.iter().all(|k| on_chain_members.iter().any(|m| m == k)), "every recorded join's member key is in the on-chain ring");
+        check(
+            joins.iter().all(|k| on_chain_members.iter().any(|m| m == k)),
+            "every recorded join's member key is in the on-chain ring",
+        );
         // (tx, key image, payout output) for every claim and refund.
         let payouts: Vec<(String, String, String)> = ["claims", "refunds"]
             .iter()
             .flat_map(|kind| round[*kind].as_array().cloned().unwrap_or_default())
-            .filter_map(|p| Some((p["tx"].as_str()?.to_string(), p["key_image"].as_str()?.to_string(), p["payout_output"].as_str()?.to_string())))
+            .filter_map(|p| {
+                Some((
+                    p["tx"].as_str()?.to_string(),
+                    p["key_image"].as_str()?.to_string(),
+                    p["payout_output"].as_str()?.to_string(),
+                ))
+            })
             .collect();
-        check(payouts.iter().all(|(_, img, _)| on_chain_tags.contains(img)), "every recorded claim/refund tag is in the on-chain spent set");
-        check(on_chain_tags.len() == (state.claims + state.refunds) as usize, "one spent tag per claim or refund, nothing else");
+        check(
+            payouts.iter().all(|(_, img, _)| on_chain_tags.contains(img)),
+            "every recorded claim/refund tag is in the on-chain spent set",
+        );
+        check(
+            on_chain_tags.len() == (state.claims + state.refunds) as usize,
+            "one spent tag per claim or refund, nothing else",
+        );
 
         let mut join_signers = HashSet::new();
         for tx in strs(&round, "joins", "tx") {
@@ -134,7 +164,11 @@ async fn main() -> Result<()> {
                     linked = true;
                 }
             }
-            println!("  payout tx {} sealed by {} (fresh)", short(tx), s.iter().map(|k| short(k)).collect::<Vec<_>>().join(", "));
+            println!(
+                "  payout tx {} sealed by {} (fresh)",
+                short(tx),
+                s.iter().map(|k| short(k)).collect::<Vec<_>>().join(", ")
+            );
         }
         check(!linked, "no claim is signed by a member key, a join signer, or another claim's signer");
 
@@ -145,8 +179,10 @@ async fn main() -> Result<()> {
                 Ok(v) => {
                     let body = &v["state"]["up"]["substate"]["Utxo"]["output"]["output"];
                     let text = body.to_string();
-                    hidden &= body["encrypted_data"].is_string() && !text.contains("\"amount\"") && !text.contains("\"value\"");
-                },
+                    hidden &= body["encrypted_data"].is_string()
+                        && !text.contains("\"amount\"")
+                        && !text.contains("\"value\"");
+                }
                 Err(e) => println!("  payout {} not readable (spent since?): {e}", short(out)),
             }
         }
@@ -170,12 +206,15 @@ async fn main() -> Result<()> {
                         Ok(Some(o)) => {
                             opens += 1;
                             row.push_str(&format!(" {:>10}", o.value));
-                        },
+                        }
                         Ok(None) => row.push_str("     sealed"),
                         Err(_) => row.push_str("       gone"),
                     }
                 }
-                println!("   {:<28}{row}", dir.file_name().map(|f| f.to_string_lossy().to_string()).unwrap_or_default());
+                println!(
+                    "   {:<28}{row}",
+                    dir.file_name().map(|f| f.to_string_lossy().to_string()).unwrap_or_default()
+                );
                 check(opens <= 1, "this member opens at most one payout");
             }
         }

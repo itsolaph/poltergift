@@ -45,12 +45,8 @@ pub fn is_valid_point(p: &RistrettoPublicKeyBytes) -> bool {
 /// The per-round tag base `H` (try-and-increment over Blake2b-256; see `poltergift_ring::tag_base`).
 pub fn tag_base(round_id: &[u8; 32]) -> RistrettoPublicKeyBytes {
     for ctr in 0..TAG_BASE_MAX_ATTEMPTS {
-        let candidate = intrinsics::hash_blake2b_parts(&[
-            &framed(dst::TAG_BASE),
-            dst::TAG_BASE,
-            round_id,
-            &ctr.to_le_bytes(),
-        ]);
+        let candidate =
+            intrinsics::hash_blake2b_parts(&[&framed(dst::TAG_BASE), dst::TAG_BASE, round_id, &ctr.to_le_bytes()]);
         let candidate = RistrettoPublicKeyBytes::from(candidate.into_array());
         if is_valid_point(&candidate) {
             return candidate;
@@ -166,8 +162,7 @@ pub fn verify_pop(round_id: &[u8; 32], member: &RistrettoPublicKeyBytes, pop: &[
     if !intrinsics::scalar_is_canonical(&s) {
         return false;
     }
-    let wide =
-        intrinsics::hash_sha512_parts(&[&framed(dst::JOIN_POP), dst::JOIN_POP, round_id, member.as_ref(), &r]);
+    let wide = intrinsics::hash_sha512_parts(&[&framed(dst::JOIN_POP), dst::JOIN_POP, round_id, member.as_ref(), &r]);
     let c = intrinsics::scalar_from_uniform_bytes(&wide.into_array());
     let neg_c = intrinsics::scalar_negate(&c);
     let lhs = intrinsics::ristretto_msm(&[RistrettoPublicKeyBytes::from(BASEPOINT), *member], &[s, neg_c]);

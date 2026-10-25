@@ -39,14 +39,9 @@ fn measure(size: u32) -> Measurement {
     h.test.enable_fees();
     h.account_fee = Some(2_000_000);
 
-    let component = h
-        .try_create(GIFT, size, JOIN_DEADLINE, CLAIM_DEADLINE, GENEROUS_CLAIM_FEE)
-        .expect("create with fees");
-    let mut round = Round {
-        component,
-        round_id: component.as_object_key().into_array(),
-        members: Vec::new(),
-    };
+    let component =
+        h.try_create(GIFT, size, JOIN_DEADLINE, CLAIM_DEADLINE, GENEROUS_CLAIM_FEE).expect("create with fees");
+    let mut round = Round { component, round_id: component.as_object_key().into_array(), members: Vec::new() };
     for _ in 0..size {
         let m = h.new_member();
         h.try_join(&round, &m).expect("join with fees");
@@ -69,12 +64,7 @@ fn measure(size: u32) -> Measurement {
         "vault pays exactly the payout plus the fee actually charged"
     );
     assert!(fee_charged < GENEROUS_CLAIM_FEE);
-    Measurement {
-        size,
-        fee_charged,
-        native_points: points.native,
-        wasm_points: points.wasm,
-    }
+    Measurement { size, fee_charged, native_points: points.native, wasm_points: points.wasm }
 }
 
 #[test]

@@ -32,7 +32,7 @@
     <g transform="translate(24,266)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₄</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
     <g transform="translate(24,318)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₅</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
   </g>
-  <g stroke="#6f6890" stroke-width="1.5" marker-end="url(#arrow)">
+  <g stroke="#6f6890" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
     <path d="M198 132 C 250 132, 260 200, 318 220"/>
     <path d="M198 184 C 250 184, 270 214, 318 228"/>
     <path d="M198 236 L 318 236"/>
@@ -59,7 +59,7 @@
     <g transform="translate(684,266)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₂ → output ⓓ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
     <g transform="translate(684,318)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₄ → output ⓔ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
   </g>
-  <g stroke="#7cffb2" stroke-width="1.5" marker-end="url(#arrow-g)" opacity="0.8">
+  <g stroke="#7cffb2" stroke-width="1.5" fill="none" marker-end="url(#arrow-g)" opacity="0.8">
     <path d="M562 220 C 620 200, 630 132, 682 132"/>
     <path d="M562 228 C 620 220, 630 184, 682 184"/>
     <path d="M562 236 L 682 236"/>
@@ -70,5 +70,5 @@
   <!-- footer -->
   <rect x="24" y="384" width="832" height="66" rx="12" fill="#1a1726" stroke="#2b2640"/>
   <text x="44" y="410" fill="#ebe8f5" font-size="13"><tspan font-weight="700">Claim proof:</tspan> "I own one of P₁…P₅" (ring signature) + tag I = x·H (same key, same tag: a second claim is refused).</text>
-  <text x="44" y="432" fill="#8f8aa8" font-size="13">Signed by a throwaway key, fee paid by the vault, payout bound into the signature: no line connects the left column to the right.</text>
+  <text x="44" y="432" fill="#8f8aa8" font-size="13">Throwaway signer, vault-paid fee, payout bound into the signature: nothing links left to right.</text>
 </svg>
