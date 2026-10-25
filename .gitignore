@@ -10,3 +10,4 @@ run.done
 target/
 node_modules/
 .poltergift/
+web/dist/

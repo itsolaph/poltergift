@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Poltergift — a secret gift exchange on the Tari Ootle</title>
+    <meta name="description" content="Each ghost drops one gift; each claims one back. Nobody, not even the chain, knows who gave what to whom." />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 6c-12 0-20 9-20 21v27l6-5 5 5 5-5 4 5 4-5 5 5 5-5 6 5V27C52 15 44 6 32 6z" fill="#e9e4ff" />
+          <circle cx="25" cy="27" r="4" fill="#120f1d" />
+          <circle cx="39" cy="27" r="4" fill="#120f1d" />
+          <rect x="22" y="38" width="20" height="10" rx="2" fill="#7cffb2" />
+          <rect x="30.5" y="38" width="3" height="10" fill="#120f1d" />
+          <path d="M22 38c3-5 7-5 10 0 3-5 7-5 10 0" stroke="#7cffb2" stroke-width="2.5" fill="none" />
+        </svg>
+        <div>
+          <h1>Poltergift</h1>
+          <p class="tagline">A secret gift exchange on the Tari Ootle where nobody, not even the chain, knows who gave what to whom.</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="summon" class="active">Summon 5 Ghosts</button>
+        <button role="tab" data-tab="live">Live on Esmeralda</button>
+        <button role="tab" data-tab="how">How it works</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="summon" class="tab-panel active">
+        <div class="controls">
+          <button id="run" class="primary">👻 Summon 5 Ghosts</button>
+          <button id="step">Step</button>
+          <button id="reset">Reset</button>
+          <label class="speed">speed
+            <select id="speed">
+              <option value="900">calm</option>
+              <option value="450" selected>brisk</option>
+              <option value="120">frantic</option>
+            </select>
+          </label>
+          <span id="engine" class="muted"></span>
+        </div>
+
+        <ol class="steps" id="steps">
+          <li data-step="0">Open a haunted round (5 × 5 tTARI)</li>
+          <li data-step="1">Each ghost drops a gift</li>
+          <li data-step="2">Round sealed: gifts possessed</li>
+          <li data-step="3">Ghosts claim in random order</li>
+          <li data-step="4">Every ghost holds one gift</li>
+        </ol>
+
+        <div class="ghosts" id="ghosts"></div>
+        <p class="log" id="log" aria-live="polite">Press <b>Summon 5 Ghosts</b>: a full round runs in your browser in about 15 seconds.</p>
+
+        <div class="views">
+          <article class="view">
+            <h2>👁 Observer</h2>
+            <p class="sub">What the explorer shows anyone.</p>
+            <div id="observer"></div>
+          </article>
+          <article class="view">
+            <h2>🎁 Recipient</h2>
+            <p class="sub">Pick a ghost: only its own gift opens.</p>
+            <div id="recipient"></div>
+          </article>
+          <article class="view">
+            <h2>🧮 Auditor</h2>
+            <p class="sub">Totals only, from public data.</p>
+            <div id="auditor"></div>
+          </article>
+        </div>
+
+        <article class="lab">
+          <h2>🧪 Attack lab</h2>
+          <p class="sub">Each attempt runs against a copy of this round through the same rules the on-chain template enforces (CI replays them against the real template).</p>
+          <div class="lab-buttons" id="lab"></div>
+          <ul class="lab-results" id="lab-results"></ul>
+        </article>
+      </section>
+
+      <section id="live" class="tab-panel">
+        <div class="controls">
+          <button id="live-refresh" class="primary">Read from Esmeralda</button>
+          <span id="live-status" class="muted"></span>
+        </div>
+        <div id="live-body"></div>
+      </section>
+
+      <section id="how" class="tab-panel">
+        <div class="how">
+          <img src="how-it-works.svg" alt="Deposits go into a round vault under N member keys; claims come out to fresh stealth outputs proven only by a ring signature and a one-time tag." />
+          <div class="how-text">
+            <h2>How it works</h2>
+            <ol>
+              <li><b>Join.</b> Each ghost makes a fresh member key for this round and drops exactly one gift (same amount for everyone), ideally paid from a stealth coin so no account appears.</li>
+              <li><b>Seal.</b> When the round is full, the template fixes the ring of member keys.</li>
+              <li><b>Claim.</b> A ghost proves "I am one of the members" with a linkable ring signature (LSAG over Ristretto255), verified on chain with native intrinsics. Its <i>key image</i> <code>I = x·H</code> is a one-time tag: a second claim by the same ghost reuses the tag and is refused. The signature commits to the exact payout output, so nobody can redirect it.</li>
+              <li><b>Payout.</b> The gift goes to a brand-new stealth output; the claim transaction is signed by a throwaway key and its fee is paid by the round vault, so it points at nobody.</li>
+              <li><b>Refund.</b> If the round never fills, or a ghost vanishes, a deadline lets depositors take their gift back. The refund proves the depositor's tag is unspent, so nobody can both claim and refund.</li>
+            </ol>
+            <p class="muted">What still leaks (membership, timing, equal amounts by design) is listed honestly in THREAT_MODEL.md.</p>
+            <p><a href="https://github.com/itsolaph/poltergift">Source, tests and threat model on GitHub →</a></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      MIT licensed · built for the Tari “Spooky Secrets” October build contest · uses official Tari Ootle crates and the public Esmeralda indexer
+    </footer>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

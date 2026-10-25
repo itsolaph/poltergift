@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 470" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15121f"/>
+      <stop offset="1" stop-color="#0c0b12"/>
+    </linearGradient>
+    <linearGradient id="vault" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d2452"/>
+      <stop offset="1" stop-color="#1a1530"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#6f6890"/>
+    </marker>
+    <marker id="arrow-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#7cffb2"/>
+    </marker>
+    <symbol id="ghost" viewBox="0 0 64 64">
+      <path d="M32 6c-12 0-20 9-20 21v27l6-5 5 5 5-5 4 5 4-5 5 5 5-5 6 5V27C52 15 44 6 32 6z" fill="#e9e4ff"/>
+      <circle cx="25" cy="27" r="4" fill="#120f1d"/><circle cx="39" cy="27" r="4" fill="#120f1d"/>
+    </symbol>
+  </defs>
+  <rect width="880" height="470" rx="18" fill="url(#bg)"/>
+  <text x="440" y="38" text-anchor="middle" fill="#ebe8f5" font-size="20" font-weight="700">A Poltergift round</text>
+  <text x="440" y="60" text-anchor="middle" fill="#8f8aa8" font-size="13">equal gifts in · one ring · one-time tags · unlinkable stealth payouts out</text>
+
+  <!-- deposits -->
+  <text x="110" y="96" text-anchor="middle" fill="#b18cff" font-size="13" font-weight="600">JOIN (public)</text>
+  <g font-size="12" fill="#ebe8f5">
+    <g transform="translate(24,110)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₁</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
+    <g transform="translate(24,162)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₂</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
+    <g transform="translate(24,214)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₃</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
+    <g transform="translate(24,266)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₄</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
+    <g transform="translate(24,318)"><rect width="172" height="44" rx="10" fill="#1d1a2b" stroke="#2b2640"/><use href="#ghost" x="8" y="7" width="30" height="30"/><text x="46" y="19">member key P₅</text><text x="46" y="35" fill="#ffc56b">+5 tTARI</text></g>
+  </g>
+  <g stroke="#6f6890" stroke-width="1.5" marker-end="url(#arrow)">
+    <path d="M198 132 C 250 132, 260 200, 318 220"/>
+    <path d="M198 184 C 250 184, 270 214, 318 228"/>
+    <path d="M198 236 L 318 236"/>
+    <path d="M198 288 C 250 288, 270 258, 318 244"/>
+    <path d="M198 340 C 250 340, 260 272, 318 252"/>
+  </g>
+
+  <!-- vault -->
+  <rect x="320" y="150" width="240" height="172" rx="16" fill="url(#vault)" stroke="#5b4a99"/>
+  <text x="440" y="178" text-anchor="middle" fill="#ebe8f5" font-size="15" font-weight="700">Round component</text>
+  <text x="440" y="202" text-anchor="middle" fill="#b18cff" font-size="12">vault: 25 tTARI (revealed)</text>
+  <text x="440" y="222" text-anchor="middle" fill="#b18cff" font-size="12">ring = {P₁ … P₅} (sealed)</text>
+  <text x="440" y="242" text-anchor="middle" fill="#b18cff" font-size="12">tag base H = hash-to-point(round)</text>
+  <text x="440" y="262" text-anchor="middle" fill="#b18cff" font-size="12">spent tags {I₁ … I₅}</text>
+  <text x="440" y="292" text-anchor="middle" fill="#8f8aa8" font-size="11">verifies LSAG on chain (Ristretto intrinsics)</text>
+  <text x="440" y="308" text-anchor="middle" fill="#8f8aa8" font-size="11">pays each claim's fee from the vault</text>
+
+  <!-- claims -->
+  <text x="770" y="96" text-anchor="middle" fill="#7cffb2" font-size="13" font-weight="600">CLAIM (anonymous)</text>
+  <g font-size="12" fill="#ebe8f5">
+    <g transform="translate(684,110)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₃ → output ⓐ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
+    <g transform="translate(684,162)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₁ → output ⓑ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
+    <g transform="translate(684,214)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₅ → output ⓒ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
+    <g transform="translate(684,266)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₂ → output ⓓ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
+    <g transform="translate(684,318)"><rect width="172" height="44" rx="10" fill="#14251d" stroke="#245a40"/><text x="12" y="19">tag I₄ → output ⓔ</text><text x="12" y="35" fill="#8f8aa8">owner &amp; amount hidden</text></g>
+  </g>
+  <g stroke="#7cffb2" stroke-width="1.5" marker-end="url(#arrow-g)" opacity="0.8">
+    <path d="M562 220 C 620 200, 630 132, 682 132"/>
+    <path d="M562 228 C 620 220, 630 184, 682 184"/>
+    <path d="M562 236 L 682 236"/>
+    <path d="M562 244 C 620 252, 630 288, 682 288"/>
+    <path d="M562 252 C 620 272, 630 340, 682 340"/>
+  </g>
+
+  <!-- footer -->
+  <rect x="24" y="384" width="832" height="66" rx="12" fill="#1a1726" stroke="#2b2640"/>
+  <text x="44" y="410" fill="#ebe8f5" font-size="13"><tspan font-weight="700">Claim proof:</tspan> "I own one of P₁…P₅" (ring signature) + tag I = x·H (same key, same tag: a second claim is refused).</text>
+  <text x="44" y="432" fill="#8f8aa8" font-size="13">Signed by a throwaway key, fee paid by the vault, payout bound into the signature: no line connects the left column to the right.</text>
+</svg>

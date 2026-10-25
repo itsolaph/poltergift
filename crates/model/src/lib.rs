@@ -15,13 +15,39 @@ use serde::{Deserialize, Serialize};
 
 pub use ring::{MAX_RING_SIZE, PointBytes, RoundId};
 
+/// Amounts are `u128` like the template's `Amount`. JSON has no 128-bit integers, so they travel as
+/// decimal strings (and are accepted as strings or numbers).
+mod u128_text {
+    use serde::{Deserialize, Deserializer, Serializer, de::Error};
+
+    pub fn serialize<S: Serializer>(v: &u128, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(&v.to_string())
+    }
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Repr {
+        Text(String),
+        Number(u64),
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<u128, D::Error> {
+        match Repr::deserialize(d)? {
+            Repr::Text(t) => t.parse().map_err(D::Error::custom),
+            Repr::Number(n) => Ok(n as u128),
+        }
+    }
+}
+
 /// Round parameters, as passed to the template's `create`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Params {
+    #[serde(with = "u128_text")]
     pub gift_amount: u128,
     pub size: u32,
     pub join_deadline: u64,
     pub claim_deadline: u64,
+    #[serde(with = "u128_text")]
     pub claim_fee: u128,
 }
 
@@ -30,8 +56,10 @@ pub struct Params {
 pub struct PayoutShape {
     pub stealth_inputs: usize,
     pub covenant_claims: usize,
+    #[serde(with = "u128_text")]
     pub revealed_output: u128,
     pub stealth_outputs: usize,
+    #[serde(with = "u128_text")]
     pub revealed_input: u128,
 }
 
@@ -117,6 +145,7 @@ pub struct RoundModel {
     pub refunded: Vec<u32>,
     pub claims: u32,
     pub refunds: u32,
+    #[serde(with = "u128_text")]
     pub vault: u128,
 }
 

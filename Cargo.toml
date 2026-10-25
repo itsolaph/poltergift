@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/ring", "crates/model", "crates/client", "crates/cli"]
+members = ["crates/ring", "crates/model", "crates/client", "crates/cli", "crates/wasm"]
 exclude = ["template", ".chain"]
 
 [workspace.package]
@@ -25,3 +25,6 @@ proptest = "1"
 
 [profile.release]
 opt-level = 3
+
+[profile.release.package.poltergift-wasm]
+opt-level = "s"

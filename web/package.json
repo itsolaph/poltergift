@@ -1,0 +1,19 @@
+{
+  "name": "poltergift-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Poltergift browser demo: a full secret gift round in the browser, plus the live rounds on Esmeralda",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test scripts/test-wasm.mjs"
+  },
+  "devDependencies": {
+    "binaryen": "^132.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  }
+}

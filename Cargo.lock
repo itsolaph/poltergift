@@ -2267,6 +2267,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "poltergift-wasm"
+version = "0.1.0"
+dependencies = [
+ "curve25519-dalek",
+ "hex",
+ "poltergift-model",
+ "poltergift-ring",
+ "rand_chacha 0.10.0",
+ "rand_core 0.10.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "poly1305"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
