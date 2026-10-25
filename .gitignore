@@ -1,0 +1,11 @@
+.secrets/
+.chain/
+BRIEF.md
+PROGRESS.md
+log.jsonl
+err.log
+run.sh
+run.pid
+run.done
+target/
+node_modules/

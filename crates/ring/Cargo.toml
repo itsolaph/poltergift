@@ -1,0 +1,20 @@
+[package]
+name = "poltergift-ring"
+description = "Linkable ring signatures (LSAG over Ristretto255) for Poltergift gift rounds"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+curve25519-dalek = { workspace = true }
+blake2 = { workspace = true }
+sha2 = { workspace = true }
+rand_core = { workspace = true }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+rand_chacha = { workspace = true }
+rand_core = { workspace = true }
+proptest = { workspace = true }
+hex = { workspace = true }
