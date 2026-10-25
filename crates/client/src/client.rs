@@ -6,6 +6,7 @@ use anyhow::{Context, Result, anyhow, bail};
 use ootle_rs::{
     Address, Epoch, Network, ToAccountAddress, TransactionOutcome, TransactionRequest,
     builtin_templates::{UnsignedTransactionBuilder, faucet::IFaucet},
+    claim_burn::{ClaimBurn, MinotariBurnClaimProof},
     key_provider::PrivateKeyProvider,
     keys::OotleSecretKey,
     provider::{IndexerProvider, IndexerTrust, Provider, ProviderBuilder, WalletProvider, WantInput},
@@ -21,7 +22,7 @@ use tari_ootle_common_types::engine_types::{
 };
 use tari_ootle_transaction::{Transaction, TransactionId, UnsignedTransaction, args};
 use tari_template_lib_types::{
-    Amount, ComponentAddress, TemplateAddress, UtxoAddress,
+    Amount, ComponentAddress, EncryptedData, TemplateAddress, UtxoAddress,
     constants::TARI_TOKEN,
     crypto::{PedersenCommitmentBytes, RistrettoPublicKeyBytes},
     stealth::StealthTransferStatement,
@@ -249,6 +250,101 @@ impl PoltergiftClient {
             )
             .await?;
         Ok((finalized, commitments))
+    }
+
+    /// The key an L1 (minotari) burn must name as its claim public key for this wallet to claim it.
+    pub fn burn_claim_public_key(&self) -> RistrettoPublicKeyBytes {
+        use ootle_byte_type::ToByteType;
+        use tari_crypto::keys::PublicKey as _;
+        tari_crypto::ristretto::RistrettoPublicKey::from_secret_key(self.secret.account_secret()).to_byte_type()
+    }
+
+    /// Claims an L1 burn proof (the `{ "claim_proof": …, "encrypted_data": … }` JSON the console
+    /// wallet writes) into a fresh stealth output of this wallet. Returns the output and its value.
+    pub async fn claim_burn(&mut self, proof_json: &str) -> Result<(Finalized, PedersenCommitmentBytes, u64)> {
+        #[derive(serde::Deserialize)]
+        struct BurnProofFile {
+            claim_proof: MinotariBurnClaimProof,
+            encrypted_data: EncryptedData,
+        }
+        let file: BurnProofFile = serde_json::from_str(proof_json).context("parsing burn proof JSON")?;
+        let max_epoch = self.max_epoch().await?;
+        // The fee is revealed from the claimed funds and keeps no change, so measure it first.
+        let (probe, sealer) =
+            ClaimBurn::new(&self.provider, file.claim_proof.clone(), file.encrypted_data.clone(), max_epoch)
+                .with_max_fee(200_000u64)
+                .prepare()
+                .await?;
+        let dry = self.provider.sign_and_send_dry_run_with(&sealer, probe).await?;
+        let fee = required_fee(&dry)?;
+        let (unsigned, sealer) = ClaimBurn::new(&self.provider, file.claim_proof, file.encrypted_data, max_epoch)
+            .with_max_fee(fee)
+            .with_memo_message("poltergift: claimed L1 burn")
+            .prepare()
+            .await?;
+        let tx = TransactionRequest::default().with_transaction(unsigned).build(&sealer).await?;
+        let finalized = self.submit(tx).await?;
+        let mut owned = None;
+        for c in finalized.created_utxos() {
+            if let Ok(Some(o)) = self.open_output(c).await {
+                owned = Some((c, o.value));
+            }
+        }
+        let (commitment, value) =
+            owned.ok_or_else(|| anyhow!("claimed, but the new output does not open with this wallet"))?;
+        Ok((finalized, commitment, value))
+    }
+
+    /// Moves `amount` from one of this wallet's stealth outputs into its account (creating the
+    /// account if needed); change returns as a fresh stealth output.
+    pub async fn deposit_to_account(
+        &mut self,
+        input: PedersenCommitmentBytes,
+        input_value: u64,
+        amount: u64,
+    ) -> Result<Finalized> {
+        let owner = self.burn_claim_public_key();
+        // Pass 0 dry-runs with a generous budget to measure the fee; pass 1 submits with it. The fee
+        // is part of the statement (revealed from the input), so the statement is rebuilt.
+        let mut fee = 200_000u64.min(input_value.saturating_sub(amount + 1));
+        for pass in 0..2 {
+            let change =
+                input_value.checked_sub(amount + fee).ok_or_else(|| anyhow!("input too small for amount + fee"))?;
+            let mut builder = StealthTransfer::new(TARI_TOKEN, &self.provider)
+                .spend_stealth_input(self.address(), input)
+                .to_revealed_output(amount + fee);
+            if let Some(change) = NonZeroU64::new(change) {
+                builder = builder.to_stealth_output(Output::new(self.address(), TARI_TOKEN, change));
+            }
+            let (statement, signers) = builder.prepare().await?;
+            let unsigned = Transaction::builder(self.network(), self.max_epoch().await?)
+                .with_fee_instructions_builder(|b| {
+                    b.stealth_transfer(TARI_TOKEN, statement.clone())
+                        .put_last_instruction_output_on_workspace("funds")
+                        .take_from_bucket("funds", Amount::from(amount), "deposit")
+                        .pay_fee_from_bucket("funds")
+                        .create_account_with_bucket(owner, "deposit")
+                })
+                .with_auto_fill_inputs()
+                .add_input(TARI_TOKEN)
+                .add_input(UtxoAddress::new(TARI_TOKEN, input.into()))
+                .build_unsigned()
+                .with_dry_run(pass == 0);
+            let unsigned = self
+                .resolve(
+                    unsigned,
+                    &[WantInput::SpecificSubstate { substate_id: self.account().into(), required: false }],
+                )
+                .await?;
+            let authorizer = self.provider.wallet().stealth_authorizer(signers);
+            let tx = TransactionRequest::default().with_transaction(unsigned).build(&authorizer).await?;
+            if pass == 0 {
+                fee = required_fee(&self.provider.send_dry_run(tx).await?)?;
+            } else {
+                return self.submit(tx).await;
+            }
+        }
+        unreachable!("the second pass submits")
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -76,6 +76,22 @@ enum Command {
     Bots(BotsArgs),
     /// Scan the chain for this wallet's stealth outputs and open them.
     Scan,
+    /// Print the claim public key an L1 (minotari) burn must name for this wallet to claim it.
+    BurnKey,
+    /// Claim an L1 burn proof file into a stealth output of this wallet.
+    ClaimBurn {
+        #[arg(long)]
+        proof: PathBuf,
+    },
+    /// Move TARI from one of this wallet's stealth outputs into its account.
+    Deposit {
+        /// The stealth output, as `COMMITMENT:VALUE_TARI` (see `scan`).
+        #[arg(long)]
+        utxo: String,
+        /// Amount to deposit, in TARI.
+        #[arg(long)]
+        amount: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -252,6 +268,28 @@ async fn main() -> Result<()> {
         Command::Round(cmd) => round_command(&ctx, cmd).await?,
         Command::Inspect { component, member_dirs } => inspect(&ctx, &component, &member_dirs).await?,
         Command::Bots(args) => bots(&ctx, args).await?,
+        Command::BurnKey => {
+            let store = Store::open(&ctx.data_dir)?;
+            let secret = store.load_wallet(network)?;
+            let client = PoltergiftClient::connect_with_trust(&ctx.indexer, secret, ctx.trust).await?;
+            println!("{}", hex::encode(client.burn_claim_public_key().into_array()));
+        }
+        Command::ClaimBurn { proof } => {
+            let (mut client, _) = ctx.client().await?;
+            let json = std::fs::read_to_string(&proof).with_context(|| format!("reading {}", proof.display()))?;
+            let (f, commitment, value) = client.claim_burn(&json).await?;
+            println!("claim tx {} (fee {} µT)", f.tx_id, f.fee_paid());
+            println!("utxo {}:{}", hex::encode(commitment.into_array()), format_tari_u64(value));
+        }
+        Command::Deposit { utxo, amount } => {
+            let (mut client, _) = ctx.client().await?;
+            let (commitment, value) = utxo.split_once(':').ok_or_else(|| anyhow!("use COMMITMENT:VALUE"))?;
+            let f = client
+                .deposit_to_account(parse_commitment(commitment)?, parse_tari(value)?, parse_tari(&amount)?)
+                .await?;
+            println!("deposit tx {} (fee {} µT)", f.tx_id, f.fee_paid());
+            println!("account balance: {}", format_tari(client.account_balance().await?));
+        }
         Command::Scan => {
             let (client, _) = ctx.client().await?;
             let owned = client.scan_owned().await?;
