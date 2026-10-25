@@ -203,7 +203,7 @@ impl Sim {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig { cases: 24, max_shrink_iters: 64, ..ProptestConfig::default() })]
+    #![proptest_config(ProptestConfig { cases: 128, max_shrink_iters: 64, ..ProptestConfig::default() })]
 
     #[test]
     fn template_matches_model_and_conserves_value(

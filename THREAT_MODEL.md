@@ -66,7 +66,7 @@ the template gives, so a test cannot pass by failing for an unrelated reason.
 | 37 | Register someone else's public key (a "donation" that skews the ring) | Schnorr proof of possession bound to the round | `join_rejects_registering_someone_elses_key`, `join_rejects_missing_proof_of_possession` |
 | 38 | Replay a proof of possession into another round | round id in the PoP challenge | `join_rejects_proof_of_possession_replayed_from_another_round` |
 | 39 | Zero, oversized or overflowing parameters | `create` validation | `create_rejects_round_of_one`, `create_rejects_round_of_zero`, `create_rejects_ring_larger_than_verifier_limit`, `create_rejects_zero_claim_fee`, `create_rejects_fee_that_eats_the_whole_gift`, `create_rejects_zero_gift`, `create_rejects_gift_too_large_for_a_stealth_output`, `create_rejects_join_deadline_in_the_past`, `create_rejects_claim_deadline_not_after_join_deadline` |
-| 40 | Any sequence of the above leaves the vault unable to pay, or creates or destroys value | invariants checked after every step of random operation sequences | `equivalence.rs::template_matches_model_and_conserves_value` (24 random sequences), `equivalence.rs::scripted_sequence_covers_every_path` |
+| 40 | Any sequence of the above leaves the vault unable to pay, or creates or destroys value | invariants checked after every step of random operation sequences | `equivalence.rs::template_matches_model_and_conserves_value` (128 random sequences), `equivalence.rs::scripted_sequence_covers_every_path` |
 | 41 | Creator keeps powers over the round | `OwnerRule::None`; no admin methods exist | by construction; `happy_path.rs` rounds run with no owner proofs |
 
 The browser demo's attack lab replays seven of these against the WASM round model, which

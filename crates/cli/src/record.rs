@@ -63,6 +63,16 @@ impl Recorder {
         })
     }
 
+    /// Funding and setup transactions (faucet, burn claims, deposits, bot funding).
+    pub fn setup(&self, kind: &str, tx: &str) -> Result<()> {
+        self.update(|v| {
+            if !v["setup"].is_array() {
+                v["setup"] = json!([]);
+            }
+            v["setup"].as_array_mut().expect("setup array").push(json!({ "kind": kind, "tx": tx }));
+        })
+    }
+
     pub fn round_created(&self, label: &str, component: &str, p: &RoundParams, tx: &str) -> Result<()> {
         self.update(|v| {
             v["rounds"].as_array_mut().expect("rounds array").push(json!({

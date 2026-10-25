@@ -244,6 +244,9 @@ async fn main() -> Result<()> {
             let (mut client, _) = ctx.client().await?;
             let f = client.take_faucet().await?;
             println!("faucet tx {} (fee {} µT)", f.tx_id, f.fee_paid());
+            if let Some(r) = &ctx.recorder {
+                r.setup("faucet", &f.tx_id.to_string())?;
+            }
         }
         Command::Publish { wasm } => {
             let bytes = std::fs::read(&wasm).with_context(|| format!("reading {}", wasm.display()))?;
@@ -261,6 +264,9 @@ async fn main() -> Result<()> {
             let amount = parse_tari(&amount)?;
             let (f, commitments) = client.send_stealth(&[(to, amount)]).await?;
             println!("tx {}", f.tx_id);
+            if let Some(r) = &ctx.recorder {
+                r.setup("send to a stealth output", &f.tx_id.to_string())?;
+            }
             for c in commitments {
                 println!("utxo {}:{}", hex::encode(c.into_array()), format_tari_u64(amount));
             }
@@ -279,6 +285,9 @@ async fn main() -> Result<()> {
             let json = std::fs::read_to_string(&proof).with_context(|| format!("reading {}", proof.display()))?;
             let (f, commitment, value) = client.claim_burn(&json).await?;
             println!("claim tx {} (fee {} µT)", f.tx_id, f.fee_paid());
+            if let Some(r) = &ctx.recorder {
+                r.setup("claim L1 burn", &f.tx_id.to_string())?;
+            }
             println!("utxo {}:{}", hex::encode(commitment.into_array()), format_tari_u64(value));
         }
         Command::Deposit { utxo, amount } => {
@@ -288,6 +297,9 @@ async fn main() -> Result<()> {
                 .deposit_to_account(parse_commitment(commitment)?, parse_tari(value)?, parse_tari(&amount)?)
                 .await?;
             println!("deposit tx {} (fee {} µT)", f.tx_id, f.fee_paid());
+            if let Some(r) = &ctx.recorder {
+                r.setup("deposit stealth funds into the account", &f.tx_id.to_string())?;
+            }
             println!("account balance: {}", format_tari(client.account_balance().await?));
         }
         Command::Scan => {
@@ -547,6 +559,9 @@ async fn bots(ctx: &Ctx, a: BotsArgs) -> Result<()> {
     }
     let (f, utxos) = main.send_stealth(&recipients).await?;
     println!("funded {} bots with stealth outputs in {}", a.size, f.tx_id);
+    if let Some(r) = &ctx.recorder {
+        r.setup(&format!("fund {} bot wallets ({})", a.size, a.label), &f.tx_id.to_string())?;
+    }
 
     for (dir, utxo) in bot_dirs.iter().zip(&utxos) {
         let (mut bot, store) = ctx.client_for(dir).await?;
