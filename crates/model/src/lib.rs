@@ -147,7 +147,7 @@ fn verify_with_template_semantics(
     signature: &[u8],
 ) -> Outcome {
     let n = ring_keys.len();
-    ensure!(n >= 1 && n <= MAX_RING_SIZE, msg::RING_SIZE);
+    ensure!((1..=MAX_RING_SIZE).contains(&n), msg::RING_SIZE);
     ensure!(signature.len() == 32 * (n + 1), msg::SIG_LENGTH);
     ensure!(is_valid_point(key_image), msg::BAD_KEY_IMAGE);
     let sig = RingSignature::from_bytes(signature).map_err(|_| Rejected(msg::SIG_LENGTH))?;

@@ -262,14 +262,10 @@ impl RingSignature {
     }
 
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, Error> {
-        if bytes.len() < 64 || bytes.len() % 32 != 0 {
+        if bytes.len() < 64 || !bytes.len().is_multiple_of(32) {
             return Err(Error::Length);
         }
-        let mut chunks = bytes.chunks_exact(32).map(|c| {
-            let mut a = [0u8; 32];
-            a.copy_from_slice(c);
-            a
-        });
+        let mut chunks = bytes.as_chunks::<32>().0.iter().copied();
         let c0 = chunks.next().ok_or(Error::Length)?;
         Ok(Self { c0, s: chunks.collect() })
     }

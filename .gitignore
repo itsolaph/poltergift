@@ -9,3 +9,4 @@ run.pid
 run.done
 target/
 node_modules/
+.poltergift/

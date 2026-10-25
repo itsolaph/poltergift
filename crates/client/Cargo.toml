@@ -1,0 +1,26 @@
+[package]
+name = "poltergift-client"
+description = "Poltergift client: keys, ring signing and Tari Ootle transactions for gift rounds"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+poltergift-ring = { workspace = true }
+ootle-rs = "0.29"
+tari_ootle_transaction = "0.47"
+tari_ootle_common_types = "0.47"
+tari_template_lib_types = "0.35"
+tari_crypto = "0.24"
+ootle_byte_type = { version = "0.17", features = ["crypto"] }
+tari_bor = "0.16"
+minicbor = { version = "2.3", features = ["derive", "alloc"] }
+rand_core = { workspace = true }
+rand = "0.10"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+anyhow = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+hex = { workspace = true }
+futures = "0.3"

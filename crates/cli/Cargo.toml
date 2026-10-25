@@ -1,0 +1,25 @@
+[package]
+name = "poltergift-cli"
+description = "poltergift: command line for Poltergift secret gift rounds on the Tari Ootle"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "poltergift"
+path = "src/main.rs"
+
+[dependencies]
+poltergift-client = { path = "../client" }
+poltergift-ring = { workspace = true }
+ootle-rs = "0.29"
+tari_template_lib_types = "0.35"
+tari_ootle_transaction = "0.47"
+clap = { version = "4", features = ["derive", "env"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+anyhow = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+hex = { workspace = true }
+rand = "0.10"
