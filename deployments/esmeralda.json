@@ -1,0 +1,98 @@
+{
+  "indexer": "https://ootle-indexer-a.tari.com/",
+  "network": "esmeralda",
+  "rounds": [
+    {
+      "claims": [
+        {
+          "fee_paid_utari": 18599,
+          "key_image": "96aa550465c798ebfa52a5dee2bb9d8ccc30b6ed264c890e31eb0f82a92dc325",
+          "payout_output": "cc48490cb0135382ea0ccdef836df55cc5e701f76a68fd0a902e2477ef866316",
+          "tx": "c9a83211ca977120c8b9552403c76df3f734cc1e6d11a85de95e7be01feb11e3"
+        },
+        {
+          "fee_paid_utari": 18639,
+          "key_image": "80d0234a7c6430bc3abbb5293ae76b708f0026e348c9d7d680bfdf4856167b51",
+          "payout_output": "b4a27028cd493829ec367a97dc86100bef1242905452ccd286812815f6c5694f",
+          "tx": "bc4f7d1bd5d52381bea6be524c428603d0938b1049b8239ce2b5d5a890b675bf"
+        },
+        {
+          "fee_paid_utari": 18677,
+          "key_image": "92ab1083347b2707c4e963936deb5257e721f78313865ea1facc986149fa6c67",
+          "payout_output": "d29b3c4c0ce43699f005cac1eeee57dca99286b56030d012c9ebfe22d6340e56",
+          "tx": "7c3186bc29b7af4e274d937ca71100cbda16127688646ed3021a5a749ad08987"
+        },
+        {
+          "fee_paid_utari": 18714,
+          "key_image": "007e27d159b07e40ec8ba290fb9051eb7cf39532931ee772282884bb3150c409",
+          "payout_output": "a4b6b02367815071b101cab475940432039ee4db72830eef48217b4383591127",
+          "tx": "74537cc04fddba22b5048aea68bb189a8122d16b8fcd3a73bcb1faf6b270e8e7"
+        },
+        {
+          "fee_paid_utari": 18752,
+          "key_image": "aee9ed2baa69db040306625e35e09d221c82d8b9bf8ee9f825c9c317f507200c",
+          "payout_output": "3c6ea8acc152427d377163043eb7b12b8d5bdbeeae55d0e0f602923785f43950",
+          "tx": "67844d3acd40da1d4571c7e42f881830e32425a25aeabcf02694fb9ef59f6572"
+        }
+      ],
+      "component": "component_53560445049f7bc84d2829ce73438315e41fd04a8e87a8a1fed485acf87ccff1",
+      "create_tx": "fede1041c25f7bef243263df88447d7a822a49656463804716115760def8ab75",
+      "joins": [
+        {
+          "funded_from": "stealth",
+          "member_key": "0ee4941313ca1df877aca0545797d79a9f9862ee4ce3b6d137c511179873a33a",
+          "tx": "23ab254b0864ddf471af1376aca692f29432191c7517670dcb7f707328d98eff"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "1cd0f53e57f348352e676d8e55d29f9fc33741d722dfe92688d65f652916000d",
+          "tx": "00bf62040e072543ca9d7d07d60a3ae06f5061583f418e403747d3751858d3e4"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "880888a1f3a17965e00b248a06f6b083e0e7998e39f26cd997a49ab57b06894f",
+          "tx": "d0a7731123dd97745ae11fe3de107af6f0013e2f77dfa7c862d6df601b7ee430"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "aeadc0544d23be1c264e7ff96f27ff72c34e7fb0784591b2ba6eb7d605105225",
+          "tx": "7a8a256acbb0835a65d87a5000444bc6c4683c577487fe92cbb7fd94b054db77"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "ec2cb0647a398a5e6a33c1b284177e0264a7342f9f03bd9bc6376bcb2b1bc337",
+          "tx": "dd9329fd0a8dfae28d67ea9a1acf5d5ae1fbb154e4c395c097bcadea4e23ffcf"
+        }
+      ],
+      "label": "Round 1: five bot ghosts",
+      "params": {
+        "claim_deadline_epoch": 12690,
+        "claim_fee_utari": 50000,
+        "gift_amount_utari": 5000000,
+        "join_deadline_epoch": 12688,
+        "size": 5
+      },
+      "refunds": []
+    }
+  ],
+  "setup": [
+    {
+      "kind": "claim L1 burn",
+      "tx": "51b3dca6fa23a916f49274613dfd1fa8c6c4982cf1ca0b60964c2b7c0ee7e036"
+    },
+    {
+      "kind": "deposit stealth funds into the account",
+      "tx": "af245432b2afcccf3cfdf5efa3b2980ffb625c57edcdd642dc18ef1d2a3b3f46"
+    },
+    {
+      "kind": "fund 5 bot wallets (Round 1: five bot ghosts)",
+      "tx": "3e581f315b26d813bcd1389ba126aeeb570051dadcbaaaeb19a5c5c4b92c5dbd"
+    }
+  ],
+  "template": {
+    "address": "template_3614a1af77d007558b1cdc14d97d982ce21e22321abad8d7452e1607fb18c047",
+    "publish_tx": "78e23e6bfdb216c2ee4f13640a20bda2bbbec72ca1bc7abecb9d8cd3939ab066",
+    "wasm_blake2b_256": "748fcf79853dee3cb72117f7880742ee449e79e1365fc4f2d5b5e37f82524de3",
+    "wasm_bytes": 204708
+  }
+}

@@ -634,7 +634,10 @@ fn required_fee(result: &ExecuteResult) -> Result<u64> {
     let floor = result.finalize.required_fees();
     let points = result.wasm_execution_points + result.native_execution_points;
     let compute = points.div_ceil(1000);
-    Ok(floor.max(compute) * 6 / 5 + 1_000)
+    // Dry runs have been seen to under-report execution points for intrinsic-heavy calls, and a
+    // short allowance fails the transaction after its fee is taken; account-paid fees refund any
+    // excess, so the margin is generous.
+    Ok(floor.max(compute) * 2 + 5_000)
 }
 
 /// Hex helper used by the CLI output.
