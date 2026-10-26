@@ -194,7 +194,14 @@
         "join_deadline_epoch": 12687,
         "size": 2
       },
-      "refunds": []
+      "refunds": [
+        {
+          "fee_paid_utari": 12918,
+          "key_image": "8cb6dd44c64d754cd95f66d6f7713209b2b4ba7b9042f4077973ea4d9fa8800f",
+          "payout_output": "503e8aabdf1ab2949a03edc5668bf34ef5d68ecec7ca27ab61fd511029e55758",
+          "tx": "eea4ec3f85bb5d4b7bae7ab2fb4fa0804ff8cd393019416d876043a1873f57d5"
+        }
+      ]
     }
   ],
   "setup": [

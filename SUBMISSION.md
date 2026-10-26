@@ -18,10 +18,14 @@
 > their gift back if a round never fills or a member vanishes, and a DLEQ proof stops anyone from
 > both claiming and refunding.
 >
-> * **Live on Esmeralda:** the template and two real rounds, including a 5-ghost round played by bot
->   wallets with stealth-funded joins and anonymous claims. Every address and transaction is linked in
->   the README, and `examples/live_esmeralda.rs` re-checks the privacy claims against the public
->   indexer.
+> * **Live on Esmeralda:** the template and four real rounds: a 5-ghost round played by bot wallets
+>   with stealth-funded joins and anonymous claims, a 3-ghost round, a round that never filled (both
+>   members refunded after the join deadline), and a round where one member vanished and refunded
+>   after the claim deadline, while the deployed template refused the early refund, the refund by the
+>   member who had already claimed, and the late claim. Every address and transaction is linked in the
+>   README, and `examples/live_esmeralda.rs` re-checks the privacy claims against the public indexer
+>   (all checks pass). The faucet was empty, so the tTARI came from CPU-mining Esmeralda L1 and
+>   burning to the Ootle.
 > * **Browser demo, no wallet, under 2 minutes:** https://itsolaph.github.io/poltergift/ :
 >   "Summon 5 Ghosts" plays a full round in your browser with the same Rust code compiled to WASM.
 >   It has Observer / Recipient / Auditor views, an attack lab, and a live view of the Esmeralda rounds.

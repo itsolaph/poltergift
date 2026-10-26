@@ -1,0 +1,111 @@
+{
+  "taken_at": "2026-10-26T11:04:54.130Z",
+  "epoch": 12688,
+  "indexer": "https://esme-indexer-a.ootle.tari.com",
+  "rounds": [
+    {
+      "component": "component_53560445049f7bc84d2829ce73438315e41fd04a8e87a8a1fed485acf87ccff1",
+      "vaultId": "53fe016f68f292d2d10f1756e896c8b63985ca5da3ac943ee0195f81f3d0246b",
+      "gift": 5000000,
+      "claimFee": 50000,
+      "size": 5,
+      "joinDeadline": 12688,
+      "claimDeadline": 12690,
+      "roundId": "53560445049f7bc84d2829ce73438315e41fd04a8e87a8a1fed485acf87ccff1",
+      "tagBase": "ba156c3f4aee8794231dd034a7953b9bfd82f7492c4d44473d4beea1321e4f39",
+      "members": [
+        "0ee4941313ca1df877aca0545797d79a9f9862ee4ce3b6d137c511179873a33a",
+        "1cd0f53e57f348352e676d8e55d29f9fc33741d722dfe92688d65f652916000d",
+        "880888a1f3a17965e00b248a06f6b083e0e7998e39f26cd997a49ab57b06894f",
+        "aeadc0544d23be1c264e7ff96f27ff72c34e7fb0784591b2ba6eb7d605105225",
+        "ec2cb0647a398a5e6a33c1b284177e0264a7342f9f03bd9bc6376bcb2b1bc337"
+      ],
+      "sealed": true,
+      "spentTags": [
+        "96aa550465c798ebfa52a5dee2bb9d8ccc30b6ed264c890e31eb0f82a92dc325",
+        "80d0234a7c6430bc3abbb5293ae76b708f0026e348c9d7d680bfdf4856167b51",
+        "92ab1083347b2707c4e963936deb5257e721f78313865ea1facc986149fa6c67",
+        "007e27d159b07e40ec8ba290fb9051eb7cf39532931ee772282884bb3150c409",
+        "aee9ed2baa69db040306625e35e09d221c82d8b9bf8ee9f825c9c317f507200c"
+      ],
+      "claims": 5,
+      "refunds": 0,
+      "vault": 156619,
+      "tagBaseVerified": true
+    },
+    {
+      "component": "component_a96f42fa9a98c5305df60cfcae09f42d6c2a7bee135cb2594d42e21774339140",
+      "vaultId": "a904d903ace530a03b8ad91263e7c7fb48484ea551571dd2b436a169fe81b676",
+      "gift": 5000000,
+      "claimFee": 50000,
+      "size": 3,
+      "joinDeadline": 12687,
+      "claimDeadline": 12688,
+      "roundId": "a96f42fa9a98c5305df60cfcae09f42d6c2a7bee135cb2594d42e21774339140",
+      "tagBase": "5e6d398b364fb985303a1d67e4002855586261096dd41a82ad841d1edd42b957",
+      "members": [
+        "f480f12731f46ed4d68eaaf235e1efd2894a49bf844676496fa26957c8d48606",
+        "5e7d01e4d070ae23bdccf13bf148db4440cb5f9c403e5ace7e8e179f93860970",
+        "6415d45464ce520acc6c2c7a9614a4631a0b3232a45b52cc8a76fc0344c05e42"
+      ],
+      "sealed": true,
+      "spentTags": [
+        "78a645249b4100a37e550c3d4e09b969905b746788319c68204ff90b2c99eb39",
+        "2c2c8d7423b6850e4371cf8f2fa697a72931c4e670cf69fddbdadee737c1e065",
+        "7ccdf86d1cabade096dbfb058d55fadc506ffe1c0ae7f1a00100fa9867e7c913"
+      ],
+      "claims": 3,
+      "refunds": 0,
+      "vault": 102825,
+      "tagBaseVerified": true
+    },
+    {
+      "component": "component_0264853db4b0db83ef038d59eab37b2168dc4df1ebed7363f23bf19d1cee2e59",
+      "vaultId": "021fbf293652392dfe166269cd3cb6ac3386aa66a3a4611686b9825bf44cfd74",
+      "gift": 5000000,
+      "claimFee": 50000,
+      "size": 4,
+      "joinDeadline": 12687,
+      "claimDeadline": 12688,
+      "roundId": "0264853db4b0db83ef038d59eab37b2168dc4df1ebed7363f23bf19d1cee2e59",
+      "tagBase": "b2d8d0c6df7625ba9449a1de45595c36e756c09e182fd7943240f7bb78ca987e",
+      "members": [
+        "9a8df96a5ac44d38b33b91334368eff11156bdefd02f0bcc9a61658a6f51640f",
+        "9ce4fe5dd4444fe7df0a36dc054645762e52c8c78536296b96fee2a541549b38"
+      ],
+      "sealed": false,
+      "spentTags": [
+        "04bdf7b20ba4112f1d582cc39c9a2c15cb292c0f1c4c8825236b5e8171131c32",
+        "4af949eb6cef2dc3aff418e3cd716662da3d8eec5d6cc41f4f619babd8872042"
+      ],
+      "claims": 0,
+      "refunds": 2,
+      "vault": 74261,
+      "tagBaseVerified": true
+    },
+    {
+      "component": "component_ae2414fba1b621a0cd5f54191bdc88e1151f4696ad6ce30bef1a4d1dd64e3880",
+      "vaultId": "ae69111a4a80855f76e9cbe84f50c1fcd9552d0447c7d685f27d0d90c9b64521",
+      "gift": 5000000,
+      "claimFee": 50000,
+      "size": 2,
+      "joinDeadline": 12687,
+      "claimDeadline": 12688,
+      "roundId": "ae2414fba1b621a0cd5f54191bdc88e1151f4696ad6ce30bef1a4d1dd64e3880",
+      "tagBase": "da3dab519f921e90bbec1b86b772e8e357cd1f2eb797fc827c4c6ed44703285a",
+      "members": [
+        "cc9f8a9f729a4beaf2148019065e6a56265c2586b064d7b994ece1a82fa69b3d",
+        "c678e49a944bb27247949674d281bdc28b3e95a0d34e78b6a40aaaf0653a0d6b"
+      ],
+      "sealed": true,
+      "spentTags": [
+        "902bc04a0f4a72fba5d8207586f5775ad24e4e6144ddd1348acba4767ec70d40",
+        "8cb6dd44c64d754cd95f66d6f7713209b2b4ba7b9042f4077973ea4d9fa8800f"
+      ],
+      "claims": 1,
+      "refunds": 1,
+      "vault": 72850,
+      "tagBaseVerified": true
+    }
+  ]
+}
