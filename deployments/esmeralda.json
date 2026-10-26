@@ -73,6 +73,115 @@
         "size": 5
       },
       "refunds": []
+    },
+    {
+      "claims": [
+        {
+          "fee_paid_utari": 15687,
+          "key_image": "78a645249b4100a37e550c3d4e09b969905b746788319c68204ff90b2c99eb39",
+          "payout_output": "ca12f0b6f60eef5689d663c2fde2135c5ee388b84240f428b48df95b62b8854e",
+          "tx": "b069bf195cb6fa16c10bfdece88f090587bf7bf3d369bc64fcf9aae8ab1ab08b"
+        },
+        {
+          "fee_paid_utari": 15725,
+          "key_image": "2c2c8d7423b6850e4371cf8f2fa697a72931c4e670cf69fddbdadee737c1e065",
+          "payout_output": "44b9d177ac32655d104c98e96bb8067037c7e3ad0cfcd7b5ec2443070e5f7535",
+          "tx": "1fbe037cd65ca2ef7a86619dcb61bc6a5a925977c7c6a22f7422ff825bc8c8a2"
+        },
+        {
+          "fee_paid_utari": 15763,
+          "key_image": "7ccdf86d1cabade096dbfb058d55fadc506ffe1c0ae7f1a00100fa9867e7c913",
+          "payout_output": "fca6d4a6223b4d432cd3e23f590f93985addb209b5440c4673295c1457402d47",
+          "tx": "144e7144849cc4288dd978273c1f12da1a8ecd22842b0c0ae83f53e5dc057cde"
+        }
+      ],
+      "component": "component_a96f42fa9a98c5305df60cfcae09f42d6c2a7bee135cb2594d42e21774339140",
+      "create_tx": "3e40c8ac577df3ab3c13c22d38a92b7780a4fe320e4353054f2bce8e2782e7eb",
+      "joins": [
+        {
+          "funded_from": "stealth",
+          "member_key": "f480f12731f46ed4d68eaaf235e1efd2894a49bf844676496fa26957c8d48606",
+          "tx": "d05d59b0643383d5f4f98c94591cf5c24e7f6a2db5a67dc0295f23212f37d7d1"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "5e7d01e4d070ae23bdccf13bf148db4440cb5f9c403e5ace7e8e179f93860970",
+          "tx": "4103b76a9245aa609637c74f8a676c46ef91c1ef5f67dec1a77dc92733cdb88e"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "6415d45464ce520acc6c2c7a9614a4631a0b3232a45b52cc8a76fc0344c05e42",
+          "tx": "b2ad46dd5608178eb52ff7d184368b114695ec5604d07621cbf377989e3069c7"
+        }
+      ],
+      "label": "Round 2: three ghosts, all claim",
+      "params": {
+        "claim_deadline_epoch": 12688,
+        "claim_fee_utari": 50000,
+        "gift_amount_utari": 5000000,
+        "join_deadline_epoch": 12687,
+        "size": 3
+      },
+      "refunds": []
+    },
+    {
+      "claims": [],
+      "component": "component_0264853db4b0db83ef038d59eab37b2168dc4df1ebed7363f23bf19d1cee2e59",
+      "create_tx": "151b9d527b56a4103ee3e96a978dc512175ee03b416001b490ebdd2edf2aea54",
+      "joins": [
+        {
+          "funded_from": "stealth",
+          "member_key": "9a8df96a5ac44d38b33b91334368eff11156bdefd02f0bcc9a61658a6f51640f",
+          "tx": "277d1206d7d6896a0da0cafc3e0c380975067c298c465414330bdd3e0392466b"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "9ce4fe5dd4444fe7df0a36dc054645762e52c8c78536296b96fee2a541549b38",
+          "tx": "eccb4cd3d99b7dd03660d51be3bced7c88a73b64c2d43251d6437c2789ba43b5"
+        }
+      ],
+      "label": "Round 3: a round that never fills (refunds after the join deadline)",
+      "params": {
+        "claim_deadline_epoch": 12688,
+        "claim_fee_utari": 50000,
+        "gift_amount_utari": 5000000,
+        "join_deadline_epoch": 12687,
+        "size": 4
+      },
+      "refunds": []
+    },
+    {
+      "claims": [
+        {
+          "fee_paid_utari": 14232,
+          "key_image": "902bc04a0f4a72fba5d8207586f5775ad24e4e6144ddd1348acba4767ec70d40",
+          "payout_output": "2e3e2424dec0fdf9a366c5e8e709bb40bd0fe041a733606dd208f702fd56f177",
+          "tx": "af992212c57c7fb07d81f91783a1d017719dce99cd1a8481562c9099e3f80a70"
+        }
+      ],
+      "component": "component_ae2414fba1b621a0cd5f54191bdc88e1151f4696ad6ce30bef1a4d1dd64e3880",
+      "create_tx": "d9ceddeedafef2d1f8a1829c35ff7cadbd8759f9fd174bb96664616d9c9f1b62",
+      "joins": [
+        {
+          "funded_from": "stealth",
+          "member_key": "cc9f8a9f729a4beaf2148019065e6a56265c2586b064d7b994ece1a82fa69b3d",
+          "tx": "ecf7c2f29635c0461b72e25d4014d8209d677a90679999ca561c72f8cae06d91"
+        },
+        {
+          "funded_from": "stealth",
+          "member_key": "c678e49a944bb27247949674d281bdc28b3e95a0d34e78b6a40aaaf0653a0d6b",
+          "tx": "0226f3627d1884a0f8bc2e2aff812b49522330914f1483a5ee02d554bb088293"
+        }
+      ],
+      "label": "Round 4: two ghosts, one vanishes and takes a refund after the claim deadline",
+      "params": {
+        "claim_deadline_epoch": 12688,
+        "claim_fee_utari": 50000,
+        "gift_amount_utari": 5000000,
+        "join_deadline_epoch": 12687,
+        "size": 2
+      },
+      "refunds": []
     }
   ],
   "setup": [
@@ -87,6 +196,34 @@
     {
       "kind": "fund 5 bot wallets (Round 1: five bot ghosts)",
       "tx": "3e581f315b26d813bcd1389ba126aeeb570051dadcbaaaeb19a5c5c4b92c5dbd"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "1516e7ee641939749e6dac52aab2909c57dc7d37ed9a6dc6a19e46cf379d9127"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "f37538c261162ae9f1a6fcc087c9b7e79bc0b973940436ed313a03a4b7e33e76"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "71c05094e443ec74c595c89eccbb430713d72e2aaaa549c7b5782b2834fb7973"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "7f9459227a8dc07c99dc2b12a468e1861707998caea8a460c9c95339fed1b301"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "74b6842a2be54a8f8c1bc9e2239e7fc595894eff5b39b7ed9fa979c51d0e0893"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "42254875e0f0ef5912fa009b490e40c79f69e51b73529637dae8105093041500"
+    },
+    {
+      "kind": "send to a stealth output",
+      "tx": "401d91d1129c1eab60b6a1d9709b6f4aa139d9c07a6b120fcc4f31ab9c5367ae"
     }
   ],
   "template": {
