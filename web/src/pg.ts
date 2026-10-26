@@ -47,6 +47,8 @@ export function hex(b: Uint8Array): string {
 }
 
 export function short(h: string): string {
+  const m = /^([a-z]+_)?([0-9a-f]+)$/.exec(h);
+  if (m && m[2].length > 16) return `${m[1] ?? ""}${m[2].slice(0, 8)}…${m[2].slice(-6)}`;
   return h.length > 16 ? `${h.slice(0, 8)}…${h.slice(-6)}` : h;
 }
 
