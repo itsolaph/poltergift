@@ -207,3 +207,20 @@ ring member (two 2-term MSMs and one SHA-512 each). The claim pays its fee befor
 the free fee-intent grace (32M) is not the binding limit. Measured with `claim_fee = 1 tTARI`, the
 vault paid out exactly `payout + fee charged` and got the rest back. The CLI therefore defaults
 `claim_fee` to 0.05 tTARI for rings up to 16.
+
+## Lessons from the live run (2026-10-26)
+
+* **Funding without a faucet.** CPU RandomXT mining runs in light mode (~40 H/s here), so SHA3x did
+  most of the work; Esmeralda is multi-algorithm with a separate difficulty per algorithm, so mining
+  both at once adds blocks rather than competing. Coinbase maturity is 6 blocks.
+* **Burn claims wait for epochs.** The Ootle reads L1 about 100 blocks behind tip (80 blocks per
+  epoch), and a burn is claimable only once the Ootle epoch is past the burn's L1 epoch. On a quiet
+  testnet that means mining roughly 150–200 L1 blocks after the burn.
+* **Burn proof format.** The console wallet writes the L1 view of the burn (hash preimage with borsh
+  output features); `crates/client/src/burn_proof.rs` converts it the way the official wallet daemon
+  does.
+* **Fees.** Dry runs can under-report execution points for intrinsic-heavy calls, and the compute
+  allowance is bought by the fee carried, so the client carries twice the measured need on
+  account-paid transactions (the unused part is refunded).
+* **Light client.** Verified reads work on Esmeralda; right after an epoch change the indexer may
+  briefly lack the handover checkpoint, which the client retries.
