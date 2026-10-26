@@ -6,7 +6,7 @@ use anyhow::{Context, Result, anyhow, bail};
 use ootle_rs::{
     Address, Epoch, Network, ToAccountAddress, TransactionOutcome, TransactionRequest,
     builtin_templates::{UnsignedTransactionBuilder, faucet::IFaucet},
-    claim_burn::{ClaimBurn, MinotariBurnClaimProof},
+    claim_burn::ClaimBurn,
     key_provider::PrivateKeyProvider,
     keys::OotleSecretKey,
     provider::{IndexerProvider, IndexerTrust, Provider, ProviderBuilder, WalletProvider, WantInput},
@@ -22,7 +22,7 @@ use tari_ootle_common_types::engine_types::{
 };
 use tari_ootle_transaction::{Transaction, TransactionId, UnsignedTransaction, args};
 use tari_template_lib_types::{
-    Amount, ComponentAddress, EncryptedData, TemplateAddress, UtxoAddress,
+    Amount, ComponentAddress, TemplateAddress, UtxoAddress,
     constants::TARI_TOKEN,
     crypto::{PedersenCommitmentBytes, RistrettoPublicKeyBytes},
     stealth::StealthTransferStatement,
@@ -259,25 +259,18 @@ impl PoltergiftClient {
         tari_crypto::ristretto::RistrettoPublicKey::from_secret_key(self.secret.account_secret()).to_byte_type()
     }
 
-    /// Claims an L1 burn proof (the `{ "claim_proof": …, "encrypted_data": … }` JSON the console
-    /// wallet writes) into a fresh stealth output of this wallet. Returns the output and its value.
+    /// Claims an L1 burn proof file (as the console wallet writes it with `--burn-proof-out`) into a fresh stealth output of this wallet. Returns the output and its value.
     pub async fn claim_burn(&mut self, proof_json: &str) -> Result<(Finalized, PedersenCommitmentBytes, u64)> {
-        #[derive(serde::Deserialize)]
-        struct BurnProofFile {
-            claim_proof: MinotariBurnClaimProof,
-            encrypted_data: EncryptedData,
-        }
-        let file: BurnProofFile = serde_json::from_str(proof_json).context("parsing burn proof JSON")?;
+        let (claim_proof, encrypted_data) = crate::burn_proof::parse_l1_burn_proof(proof_json)?;
         let max_epoch = self.max_epoch().await?;
         // The fee is revealed from the claimed funds and keeps no change, so measure it first.
-        let (probe, sealer) =
-            ClaimBurn::new(&self.provider, file.claim_proof.clone(), file.encrypted_data.clone(), max_epoch)
-                .with_max_fee(200_000u64)
-                .prepare()
-                .await?;
+        let (probe, sealer) = ClaimBurn::new(&self.provider, claim_proof.clone(), encrypted_data.clone(), max_epoch)
+            .with_max_fee(200_000u64)
+            .prepare()
+            .await?;
         let dry = self.provider.sign_and_send_dry_run_with(&sealer, probe).await?;
         let fee = required_fee(&dry)?;
-        let (unsigned, sealer) = ClaimBurn::new(&self.provider, file.claim_proof, file.encrypted_data, max_epoch)
+        let (unsigned, sealer) = ClaimBurn::new(&self.provider, claim_proof, encrypted_data, max_epoch)
             .with_max_fee(fee)
             .with_memo_message("poltergift: claimed L1 burn")
             .prepare()

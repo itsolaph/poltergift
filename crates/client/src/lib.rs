@@ -1,6 +1,7 @@
 //! Poltergift client library: wallet storage, round state decoding, ring signing and the
 //! transactions for every round operation.
 
+pub mod burn_proof;
 pub mod client;
 pub mod scan;
 pub mod state;
