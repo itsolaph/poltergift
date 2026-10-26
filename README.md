@@ -16,6 +16,21 @@ their gift back.
 (or run it locally, see [Quick start](#quick-start)) · **Live rounds:** [deployment table](#live-on-esmeralda) ·
 **Threat model:** [THREAT_MODEL.md](THREAT_MODEL.md) · **Design notes:** [NOTES.md](NOTES.md)
 
+## Two-minute tour
+
+1. Open the [browser demo](https://itsolaph.github.io/poltergift/) and press **Summon 5 Ghosts**
+   (about 15 seconds). Five ghosts open a round, drop gifts, seal it and claim in random order.
+2. Look at the three panels: the **Observer** list of deposits and claims has nothing that pairs
+   them, the **Recipient** panel opens only the selected ghost's own gift, and the **Auditor**
+   totals balance.
+3. Click every button in the **Attack lab**: double claim, outsider, redirected payout, replay from
+   another round, early refund, wrong gift, key theft. Each is refused with the template's own
+   message.
+4. Open **Live on Esmeralda**: the same thing on the real testnet, read straight from the public
+   indexer, with every transaction linked to the explorer.
+
+<p align="center"><img src="assets/demo.png" alt="The browser demo after a full round: ghosts, observer/recipient/auditor views and the attack lab" width="90%"/></p>
+
 ## How it works (30 seconds)
 
 <p align="center"><img src="web/public/how-it-works.svg" alt="Equal gifts in under N member keys, one sealed ring, one-time tags, unlinkable stealth payouts out" width="90%"/></p>
