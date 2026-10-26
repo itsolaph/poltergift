@@ -41,7 +41,7 @@ const EPOCH_RACE_RETRIES: u32 = 12;
 const EPOCH_RACE_PAUSE: Duration = Duration::from_secs(10);
 
 fn is_epoch_race(msg: &str) -> bool {
-    msg.contains("whose validator set this provider anchored on")
+    msg.contains("whose validator set this provider anchored on") || msg.contains("has not yet served the checkpoint")
 }
 
 /// Parameters for a new round, in µT and epochs.

@@ -148,7 +148,20 @@
         "join_deadline_epoch": 12687,
         "size": 4
       },
-      "refunds": []
+      "refunds": [
+        {
+          "fee_paid_utari": 12850,
+          "key_image": "04bdf7b20ba4112f1d582cc39c9a2c15cb292c0f1c4c8825236b5e8171131c32",
+          "payout_output": "dcc1940239c7c74fda47dca2511607aad1a09654db392ff5b098d1acf6867935",
+          "tx": "b58cc5ed5efa334e052473d02c6789e363d6b86619264720859b746ef38cea68"
+        },
+        {
+          "fee_paid_utari": 12889,
+          "key_image": "4af949eb6cef2dc3aff418e3cd716662da3d8eec5d6cc41f4f619babd8872042",
+          "payout_output": "8252cb41a50a73ba8bcce4dc0e7002012a2688d9e9b7787bc4a554c2b6b0524d",
+          "tx": "cf7f6b347a3b8e6b48b105aea472365f958243d169ddb890b236b8a29c9950ee"
+        }
+      ]
     },
     {
       "claims": [
