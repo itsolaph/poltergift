@@ -40,6 +40,6 @@
 > Built only on official Tari crates (tari_template_lib 0.35, test tooling 0.47, ootle-rs 0.29). MIT
 > licensed.
 
-**3. Tari address for the prize:** `TARI_ADDRESS_PLACEHOLDER`
+**3. Tari address for the prize:** `12LTDpm29efd7BANafTLWfuHWujrVw4nnuhAPVJcnwEh3GBqC7rxFMsbKYxSg5wo6ozPWHusDcnxyjFqFsf7q4RPuB9`
 
 **4. Social post:** SOCIAL_POST_PLACEHOLDER
